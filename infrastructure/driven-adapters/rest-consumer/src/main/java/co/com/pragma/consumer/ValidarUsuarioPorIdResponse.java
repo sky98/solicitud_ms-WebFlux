@@ -11,9 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class ObjectRequest {
+public class ValidarUsuarioPorIdResponse {
 
-    private String val1;
-    private String val2;
+    private boolean existe;
 
 }

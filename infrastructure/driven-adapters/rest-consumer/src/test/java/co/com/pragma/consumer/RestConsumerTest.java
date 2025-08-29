@@ -1,6 +1,5 @@
 package co.com.pragma.consumer;
 
-
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -14,13 +13,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.test.StepVerifier;
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 class RestConsumerTest {
 
     private static RestConsumer restConsumer;
 
     private static MockWebServer mockBackEnd;
-
 
     @BeforeAll
     static void setUp() throws IOException {
@@ -37,32 +36,35 @@ class RestConsumerTest {
     }
 
     @Test
-    @DisplayName("Validate the function testGet.")
-    void validateTestGet() {
-
+    @DisplayName("Test exitoso: El usuario existe y el servicio responde OK")
+    void testValidarUsuarioPorDocumentoId_UsuarioExiste() {
         mockBackEnd.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setResponseCode(HttpStatus.OK.value())
-                .setBody("{\"state\" : \"ok\"}"));
-        var response = restConsumer.testGet();
+                .setBody("{\"existe\": true}"));
+
+        var documentoId = 123456789L;
+        var response = restConsumer.validarUsuarioPorDocumentoId(documentoId);
 
         StepVerifier.create(response)
-                .expectNextMatches(objectResponse -> objectResponse.getState().equals("ok"))
+                .expectNext(true)
                 .verifyComplete();
     }
 
     @Test
-    @DisplayName("Validate the function testPost.")
-    void validateTestPost() {
-
+    @DisplayName("Test de error: El usuario no existe y el servicio responde OK")
+    void testValidarUsuarioPorDocumentoId_UsuarioNoExiste() {
         mockBackEnd.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setResponseCode(HttpStatus.OK.value())
-                .setBody("{\"state\" : \"ok\"}"));
-        var response = restConsumer.testPost();
+                .setBody("{\"existe\": false}"));
+
+        var documentoId = 987654321L;
+        var response = restConsumer.validarUsuarioPorDocumentoId(documentoId);
 
         StepVerifier.create(response)
-                .expectNextMatches(objectResponse -> objectResponse.getState().equals("ok"))
+                .expectNext(false)
                 .verifyComplete();
     }
+
 }

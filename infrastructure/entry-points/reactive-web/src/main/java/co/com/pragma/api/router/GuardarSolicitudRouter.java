@@ -31,7 +31,7 @@ public class GuardarSolicitudRouter {
     @RouterOperations(
             {
                     @RouterOperation(
-                            path = "/api/v1/solicitudes",
+                            path = PATH,
                             produces = {
                                     MediaType.APPLICATION_JSON_VALUE
                             },

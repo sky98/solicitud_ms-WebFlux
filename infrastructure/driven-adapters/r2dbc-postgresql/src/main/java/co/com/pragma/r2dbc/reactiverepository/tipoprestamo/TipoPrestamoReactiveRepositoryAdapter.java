@@ -22,6 +22,9 @@ public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperat
         TipoPrestamoReactiveRepository
 > implements TipoPrestamoRepository {
 
+    private final String MENSAJE_ERROR_OBTENER_ID = "Error al consultar tipo_prestamo por id, error : ";
+    private final String MENSAJE_ERROR_VALIDAR_MONTO = "Error al validar monto en la tabla tipo_prestamo, error : ";
+
     public TipoPrestamoReactiveRepositoryAdapter(TipoPrestamoReactiveRepository repository, ObjectMapper mapper) {
         super(repository, mapper, entity -> mapper.map(entity, TipoPrestamo.class));
     }
@@ -30,9 +33,9 @@ public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperat
     public Mono<TipoPrestamo> obtenerPorId(Long tipoPrestamoId) {
         return super.findById(tipoPrestamoId)
                 .doOnNext(resp -> log.info("Se valido si existe tipo prestamo con id : {}", tipoPrestamoId))
-                .doOnError(e -> {
-                    log.error("Error al consultar tipo_prestamo por id : {}", e.getMessage());
-                    throw new ErrorPersistencia("Error consultando tipo_prestamo por id", Set.of("tipo_prestamo:id"));
+                .onErrorResume(e -> {
+                    log.error(MENSAJE_ERROR_OBTENER_ID + "{}", e.getMessage());
+                    return Mono.error(new ErrorPersistencia(MENSAJE_ERROR_OBTENER_ID + e.getMessage(), Set.of("tipo_prestamo:tipo_prestamo_id")));
                 });
     }
 
@@ -40,10 +43,10 @@ public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperat
     public Mono<Boolean> existeMontoEnRango(Long tipoPrestamoId, BigDecimal monto) {
         return repository.contarMontoEnRangoPorId(tipoPrestamoId, monto)
                 .map(conteo -> conteo > 0)
-                .doOnNext(tipoPrestamo -> log.info("Consultando si el monto esta en el rango permitido, monto : {}", monto))
-                .doOnError(e -> {
-                    log.error("Error al validar monto en la tabla tipo_prestamo, error : {}", e.getMessage());
-                    throw new ErrorPersistencia("Error validando si el monto de la solicitud esta en un rango permitido", Set.of("tipo_persona:monto"));
+                .doOnNext(tipoPrestamo -> log.info("Se valido si el monto esta en el rango permitido, monto : {}", monto))
+                .onErrorResume(e -> {
+                    log.error(MENSAJE_ERROR_VALIDAR_MONTO + "{}", e.getMessage());
+                    return Mono.error(new ErrorPersistencia(MENSAJE_ERROR_VALIDAR_MONTO + e.getMessage(), Set.of("tipo_persona:monto")));
                 });
     }
 }
