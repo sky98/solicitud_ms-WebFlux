@@ -1,11 +1,11 @@
 package co.com.pragma.r2dbc.entity;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 @Builder
 @Table("tipo_prestamos")
 public class TipoPrestamoEntity {
-
     @Id
     @Column("tipo_prestamo_id")
     private Long tipoPrestamoId;
@@ -30,5 +29,5 @@ public class TipoPrestamoEntity {
     @Column("tasa_interes")
     private BigDecimal tasaInteres;
     @Column("validacion_automatica")
-    private Boolean validacionAutomatica;
+    private String validacionAutomatica;
 }

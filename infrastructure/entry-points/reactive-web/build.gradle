@@ -9,4 +9,6 @@ dependencies {
 
     implementation "org.mapstruct:mapstruct:$mapStructVersion"
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapStructVersion"
+
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$openApiVersion")
 }

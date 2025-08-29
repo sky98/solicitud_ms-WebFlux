@@ -1,4 +1,5 @@
 package co.com.pragma.model.solicitud;
+
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,5 +19,5 @@ public class Solicitud {
     private Long plazo;
     private Long estadoId;
     private Long tipoPrestamoId;
-    private Long usuarioDocumentoId;
+    private Long documentoId;
 }

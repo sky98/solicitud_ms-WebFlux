@@ -18,30 +18,32 @@ import java.util.Set;
 public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         TipoPrestamo,
         TipoPrestamoEntity,
-        String,
+        Long,
         TipoPrestamoReactiveRepository
 > implements TipoPrestamoRepository {
+
     public TipoPrestamoReactiveRepositoryAdapter(TipoPrestamoReactiveRepository repository, ObjectMapper mapper) {
-        super(repository, mapper, TipoPrestamoEntity -> mapper.map(TipoPrestamoEntity, TipoPrestamo.class));
+        super(repository, mapper, entity -> mapper.map(entity, TipoPrestamo.class));
     }
 
     @Override
-    public Mono<TipoPrestamo> existePorNombre(String nombre) {
-        return repository.exitsByNombre(nombre)
-                .doOnNext(tipoPrestamo -> log.info("Consultando si existe tipo_prestamo con nombre : {}", nombre))
+    public Mono<TipoPrestamo> obtenerPorId(Long tipoPrestamoId) {
+        return super.findById(tipoPrestamoId)
+                .doOnNext(resp -> log.info("Se valido si existe tipo prestamo con id : {}", tipoPrestamoId))
                 .doOnError(e -> {
-                    log.error("Error al consultar tipo_prestamo por nombre, error : {}", e.getMessage());
-                    throw new ErrorPersistencia("Error al consultar en la tabla tipo_persona", Set.of("tipo_persona:nombre"));
+                    log.error("Error al consultar tipo_prestamo por id : {}", e.getMessage());
+                    throw new ErrorPersistencia("Error consultando tipo_prestamo por id", Set.of("tipo_prestamo:id"));
                 });
     }
 
     @Override
     public Mono<Boolean> existeMontoEnRango(Long tipoPrestamoId, BigDecimal monto) {
-        return repository.existeMontoEnRangoPorId(tipoPrestamoId, monto)
-                .doOnNext(tipoPrestamo -> log.info("Consultando si existe el monto esta en el rango permitido, monto : {}", monto))
+        return repository.contarMontoEnRangoPorId(tipoPrestamoId, monto)
+                .map(conteo -> conteo > 0)
+                .doOnNext(tipoPrestamo -> log.info("Consultando si el monto esta en el rango permitido, monto : {}", monto))
                 .doOnError(e -> {
                     log.error("Error al validar monto en la tabla tipo_prestamo, error : {}", e.getMessage());
-                    throw new ErrorPersistencia("Error al consultar en la tabla tipo_persona", Set.of("tipo_persona:monto"));
+                    throw new ErrorPersistencia("Error validando si el monto de la solicitud esta en un rango permitido", Set.of("tipo_persona:monto"));
                 });
     }
 }

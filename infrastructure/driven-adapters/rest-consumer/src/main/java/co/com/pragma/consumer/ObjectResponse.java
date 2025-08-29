@@ -1,4 +1,5 @@
-package co.com.pragma.model.estado;
+package co.com.pragma.consumer;
+
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,8 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Estado {
-    private Long estadoId;
-    private String nombre;
-    private String descripcion;
+public class ObjectResponse {
+
+    private boolean existe;
+
 }

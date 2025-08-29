@@ -31,6 +31,7 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
     public Mono<Solicitud> guardar(Solicitud solicitud) {
         return transactionalOperator.execute(
                 status -> super.save(solicitud)
-        ).singleOrEmpty();
+        ).singleOrEmpty()
+                .doOnError(e -> log.error("Se ha generado un error en la tabla solicitud"));
     }
 }
