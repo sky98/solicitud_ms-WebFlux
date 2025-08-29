@@ -1,6 +1,10 @@
 package co.com.pragma.config;
 
+import co.com.pragma.model.solicitud.gateways.ResConsumerGateway;
+import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
+import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +37,21 @@ public class UseCasesConfigTest {
         @Bean
         public MyUseCase myUseCase() {
             return new MyUseCase();
+        }
+
+        @Bean
+        public SolicitudRepository solicitudRepository(){
+            return Mockito.mock(SolicitudRepository.class);
+        }
+
+        @Bean
+        public TipoPrestamoRepository tipoPrestamoRepository(){
+            return Mockito.mock(TipoPrestamoRepository.class);
+        }
+
+        @Bean
+        public ResConsumerGateway resConsumerGateway(){
+            return Mockito.mock(ResConsumerGateway.class);
         }
     }
 
