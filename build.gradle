@@ -8,6 +8,7 @@ buildscript {
         lombokVersion = '1.18.38'
         mapStructVersion = '1.6.3'
         openApiVersion = '2.8.11'
+        jwtVersion = '0.12.5'
 	}
 }
 

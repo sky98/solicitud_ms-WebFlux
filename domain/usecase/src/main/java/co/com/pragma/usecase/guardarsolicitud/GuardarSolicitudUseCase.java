@@ -17,13 +17,22 @@ public class GuardarSolicitudUseCase {
     private final TipoPrestamoRepository tipoPrestamoRepository;
     private final ResConsumerGateway resConsumerGateway;
 
-    public Mono<Solicitud> ejecutar(Solicitud solicitud){
-        return resConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
-                .flatMap(usuarioExiste -> Boolean.TRUE.equals(usuarioExiste)
-                        ? gestionInterna(solicitud)
-                        : Mono.error(new ErrorDominio(
-                                String.format("Usuario con documentoId: %d no existe en el sistema", solicitud.getDocumentoId()),
-                        Set.of("usuario:documentoId")))
+    public Mono<Solicitud> ejecutar(Solicitud solicitud, String usuarioAutenticado){
+        return Mono.defer(() -> {
+                    if (!String.valueOf(solicitud.getDocumentoId()).equals(usuarioAutenticado)) {
+                        return Mono.error(new ErrorDominio(
+                                "El documento de la solicitud no coincide con el documento del usuario autenticado.",
+                                Set.of("usuario:documentoId")));
+                    }
+                    return Mono.just(solicitud);
+                })
+                .flatMap(validatedSolicitud ->
+                        resConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
+                                .flatMap(usuarioExiste -> Boolean.TRUE.equals(usuarioExiste)
+                                        ? gestionInterna(solicitud)
+                                        : Mono.error(new ErrorDominio(
+                                        String.format("Usuario con documentoId: %d no existe en el sistema", solicitud.getDocumentoId()),
+                                        Set.of("usuario:documentoId"))))
                 );
     }
 

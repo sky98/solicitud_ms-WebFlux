@@ -71,7 +71,7 @@ class RouterRestTest {
         when(mapper.toModel(any(CrearSolicitudRequestDTO.class))).thenReturn(solicitudFabrica);
         when(mapper.toResponse(any(Solicitud.class))).thenReturn(solicitudResponseFabrica);
         when(validador.validar(any(CrearSolicitudRequestDTO.class))).thenReturn(Mono.just(crearSolicitudRequestDTOFabrica));
-        when(guardarSolicitudUseCase.ejecutar(any(Solicitud.class))).thenReturn(Mono.just(solicitudFabrica));
+        when(guardarSolicitudUseCase.ejecutar(any(Solicitud.class), any(String.class))).thenReturn(Mono.just(solicitudFabrica));
 
         webTestClient.post()
                 .uri(BASE_PATH)

@@ -48,7 +48,7 @@ public class GuardarSolicitudUseCaseTest {
         when(mockTipoPrestamoRepository.existeMontoEnRango(anyLong(), any(BigDecimal.class))).thenReturn(Mono.just(true));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudBuilder));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, "1");
 
         StepVerifier.create(resultado)
                 .expectNextMatches(solicitud -> solicitud.getSolicitudId() != null)
@@ -64,7 +64,7 @@ public class GuardarSolicitudUseCaseTest {
     void testGuardarSolicitud_UsuarioNoExiste_DebeLanzarErrorDominio(){
         when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(false));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, "1");
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
@@ -83,7 +83,7 @@ public class GuardarSolicitudUseCaseTest {
         when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.empty());
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, "1");
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
@@ -103,7 +103,7 @@ public class GuardarSolicitudUseCaseTest {
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(tipoPrestamoBuilder));
         when(mockTipoPrestamoRepository.existeMontoEnRango(anyLong(), any(BigDecimal.class))).thenReturn(Mono.just(false));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, "1");
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
