@@ -2,7 +2,7 @@ package co.com.pragma.r2dbc.reactiverepository;
 
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.r2dbc.entity.TipoPrestamoEntity;
-import co.com.pragma.r2dbc.errores.ErrorPersistencia;
+import co.com.pragma.errores.ErrorPersistencia;
 import co.com.pragma.r2dbc.reactiverepository.tipoprestamo.TipoPrestamoReactiveRepository;
 import co.com.pragma.r2dbc.reactiverepository.tipoprestamo.TipoPrestamoReactiveRepositoryAdapter;
 import org.junit.jupiter.api.BeforeEach;

@@ -5,6 +5,7 @@ import co.com.pragma.api.dto.request.CrearSolicitudRequestDTO;
 import co.com.pragma.api.mapper.SolicitudMapper;
 import co.com.pragma.api.validador.ValidadorRequest;
 import co.com.pragma.usecase.guardarsolicitud.GuardarSolicitudUseCase;
+import co.com.pragma.usecase.obtenersolicitudesporestado.ObtenerSolicitudesPorEstadoUseCase;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -24,6 +26,7 @@ public class Handler {
     private final ValidadorRequest validadorRequest;
     private final SolicitudMapper mapper;
     private final GuardarSolicitudUseCase useCase;
+    private final ObtenerSolicitudesPorEstadoUseCase obtenerSolicitudesPorEstadoUseCase;
 
     @PreAuthorize("hasRole('3')")
     public Mono<ServerResponse> guardarSolicitud(ServerRequest serverRequest) {
@@ -49,5 +52,24 @@ public class Handler {
                         )
                 .doOnError(e -> log.error("Error en el servicio registrar solicitud : {}", e.getMessage()));
 
+    }
+
+    @PreAuthorize("hasRole('3')")
+    public Mono<ServerResponse> obtenerSolicitudesPorEstado(ServerRequest serverRequest){
+        String estadoId = serverRequest.queryParam("estadoId").orElse("1");
+        String limit = serverRequest.queryParam("limit").orElse("10");
+        String offset = serverRequest.queryParam("offset").orElse("0");
+        log.info("Consultando solicitudes con estadoId : {}", estadoId);
+        /*return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"existe\": true}");*/
+        return obtenerSolicitudesPorEstadoUseCase.ejecutar(Integer.valueOf(estadoId), Integer.valueOf(limit), Integer.valueOf(offset))
+                .collectList()
+                .flatMap(response ->{
+                    log.info("Extraccion de solicitudes por estadoId : {}, realizada con exito", estadoId);
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(response);
+                });
     }
 }

@@ -1,6 +1,4 @@
-package co.com.pragma.r2dbc.errores;
-
-import co.com.pragma.errores.ApplicationError;
+package co.com.pragma.errores;
 
 import java.util.Set;
 

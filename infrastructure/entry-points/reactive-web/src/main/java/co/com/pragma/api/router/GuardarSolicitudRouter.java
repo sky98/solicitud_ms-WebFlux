@@ -27,7 +27,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Tag(name = "Solicitudes", description = "Operaciones relacionadas con las solicitudes de los usuarios")
 public class GuardarSolicitudRouter {
 
-    public static final String PATH = "/api/v1/solicitudes";
+    public static final String PATH = "/api/v1/solicitud";
     private final Handler handler;
 
     @Bean

@@ -3,7 +3,7 @@ package co.com.pragma.r2dbc.reactiverepository.tipoprestamo;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import co.com.pragma.r2dbc.entity.TipoPrestamoEntity;
-import co.com.pragma.r2dbc.errores.ErrorPersistencia;
+import co.com.pragma.errores.ErrorPersistencia;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
