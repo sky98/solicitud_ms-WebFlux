@@ -34,7 +34,7 @@ public class RequestTokenFilter implements WebFilter {
     }
 
     private Mono<Void> autenticateManager(ServerWebExchange exchange, WebFilterChain chain, String authToken){
-        log.info("Inicia autenticacion en el contexto de spring");
+        log.info("Inicia validacion y autenticacion en el contexto de spring");
         return Mono.just(new UsernamePasswordAuthenticationToken(authToken, authToken))
                 .flatMap(jwtAuthenticateManager::authenticate)
                 .flatMap(authentication -> chain.filter(exchange)

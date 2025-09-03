@@ -1,5 +1,6 @@
 package co.com.pragma.api.security;
 
+import co.com.pragma.errores.ErrorJwtExpirado;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -46,7 +48,8 @@ public class JwtUtilsAdapter {
                         .setSigningKey(jwtSecretKey())
                         .build()
                         .parseClaimsJws(t)
-                        .getBody()));
+                        .getBody()))
+                .onErrorResume(e-> Mono.error(new ErrorJwtExpirado("Token expirado", Set.of(e.getMessage()))));
     }
 
     public Claims getClaimsFromToken(String token) {
