@@ -1,6 +1,6 @@
 package co.com.pragma.api.handlers;
 
-import co.com.pragma.api.errores.ErrorValidacion;
+import co.com.pragma.errores.ErrorValidacion;
 import co.com.pragma.errores.ApplicationError;
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.errores.ErrorJwtExpirado;

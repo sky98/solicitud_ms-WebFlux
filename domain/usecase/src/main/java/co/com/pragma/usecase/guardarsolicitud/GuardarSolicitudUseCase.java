@@ -2,7 +2,7 @@ package co.com.pragma.usecase.guardarsolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.model.solicitud.Solicitud;
-import co.com.pragma.model.solicitud.gateways.ResConsumerGateway;
+import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class GuardarSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
-    private final ResConsumerGateway resConsumerGateway;
+    private final UsuarioResConsumerGateway usuarioResConsumerGateway;
 
     public Mono<Solicitud> ejecutar(Solicitud solicitud, String usuarioAutenticado){
         return Mono.defer(() -> {
@@ -27,7 +27,7 @@ public class GuardarSolicitudUseCase {
                     return Mono.just(solicitud);
                 })
                 .flatMap(validatedSolicitud ->
-                        resConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
+                        usuarioResConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
                                 .flatMap(usuarioExiste -> Boolean.TRUE.equals(usuarioExiste)
                                         ? gestionInterna(solicitud)
                                         : Mono.error(new ErrorDominio(

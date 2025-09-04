@@ -7,4 +7,5 @@ import reactor.core.publisher.Mono;
 public interface SolicitudRepository {
     Mono<Solicitud> guardar(Solicitud solicitud);
     Flux<Solicitud> obtenerSolicitudesPorEstado(Integer estadoId, Integer limit, Integer offset);
+    Mono<Long> contarSolicitudesPorEstado(Integer estadoId);
 }

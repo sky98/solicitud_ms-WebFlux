@@ -4,4 +4,5 @@ import reactor.core.publisher.Mono;
 
 public interface EstadoRepository {
     Mono<String> obtenerNombreEstadoPorId(Long id);
+    Mono<Boolean> existeEstadoPorId(Long id);
 }

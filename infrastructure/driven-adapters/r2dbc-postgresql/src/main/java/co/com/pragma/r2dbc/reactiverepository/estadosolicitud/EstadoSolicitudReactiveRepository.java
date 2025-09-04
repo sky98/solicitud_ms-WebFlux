@@ -8,7 +8,8 @@ import reactor.core.publisher.Mono;
 
 public interface EstadoSolicitudReactiveRepository extends ReactiveCrudRepository<EstadoSolicitudEntity, Long>, ReactiveQueryByExampleExecutor<EstadoSolicitudEntity> {
 
-    @Query("SELECT nombre FROM estados WHERE id = :estadoId")
+    @Query("SELECT nombre FROM estados WHERE estado_id = :estadoId")
     Mono<String> findNombreById(Long estadoId);
+    Mono<Boolean> existsByEstadoId(Long estadoId);
 
 }

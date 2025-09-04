@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RestConsumerTest {
 
-    private static RestConsumer restConsumer;
+    private static RestConsumerUsuario restConsumer;
 
     private static MockWebServer mockBackEnd;
 
@@ -26,7 +26,7 @@ class RestConsumerTest {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
         var webClient = WebClient.builder().baseUrl(mockBackEnd.url("/").toString()).build();
-        restConsumer = new RestConsumer(webClient);
+        restConsumer = new RestConsumerUsuario(webClient);
     }
 
     @AfterAll
