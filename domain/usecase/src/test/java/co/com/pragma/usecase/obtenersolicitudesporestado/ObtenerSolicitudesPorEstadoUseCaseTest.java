@@ -1,10 +1,12 @@
 package co.com.pragma.usecase.obtenersolicitudesporestado;
 
 import co.com.pragma.errores.ErrorValidacion;
+import co.com.pragma.fabricas.EstadoFabrica;
 import co.com.pragma.fabricas.SolicitudFabrica;
 import co.com.pragma.fabricas.TipoPrestamoFabrica;
 import co.com.pragma.fabricas.UsuarioFabrica;
 import co.com.pragma.model.Paginacion;
+import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
 import co.com.pragma.model.solicitud.DetallesSolicitudes;
 import co.com.pragma.model.solicitud.Solicitud;
@@ -48,18 +50,19 @@ public class ObtenerSolicitudesPorEstadoUseCaseTest {
     private Solicitud solicitudBuilder = SolicitudFabrica.builder().build();
     private TipoPrestamo tipoPrestamoBuilder = TipoPrestamoFabrica.builder().build();
     private Usuario usuarioBuilder = UsuarioFabrica.builder().build();
+    private Estado estadoBuilder = EstadoFabrica.builder().build();
+
+    private Integer estadoId = 1;
+    private Integer limit = 10;
+    private Integer offset = 0;
 
     @Test
     void deberiaObtenerSolicitudesPorEstadoConExito() {
-        Integer estadoId = 1;
-        Integer limit = 10;
-        Integer offset = 0;
 
-        when(estadoRepository.existeEstadoPorId(any(Long.class))).thenReturn(Mono.just(true));
+        when(estadoRepository.obtenerPorId(any(Long.class))).thenReturn(Mono.just(estadoBuilder));
         when(solicitudRepository.obtenerSolicitudesPorEstado(any(Integer.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(Flux.just(solicitudBuilder));
         when(solicitudRepository.contarSolicitudesPorEstado(any(Integer.class))).thenReturn(Mono.just(1L));
-        when(estadoRepository.obtenerNombreEstadoPorId(anyLong())).thenReturn(Mono.just("Aprobada"));
         when(tipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(tipoPrestamoBuilder));
         when(usuarioRestConsumerGateway.obtenerUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(usuarioBuilder));
 
@@ -72,18 +75,13 @@ public class ObtenerSolicitudesPorEstadoUseCaseTest {
                     assertEquals(1L, paginacion.getNumeroPagina());
                     assertEquals(10L, paginacion.getTamanoPagina());
                     assertEquals(1, paginacion.getItems().size());
-                    assertEquals("Aprobada", paginacion.getItems().get(0).getEstadoSolicitud());
                 })
                 .verifyComplete();
     }
 
     @Test
     void deberiaLanzarErrorCuandoEstadoNoExiste() {
-        Integer estadoId = 99;
-        Integer limit = 10;
-        Integer offset = 0;
-
-        when(estadoRepository.existeEstadoPorId(any(Long.class))).thenReturn(Mono.just(false));
+        when(estadoRepository.obtenerPorId(any(Long.class))).thenReturn(Mono.empty());
 
         Mono<Paginacion<DetallesSolicitudes>> resultado = obtenerSolicitudesPorEstadoUseCase.ejecutar(estadoId, limit, offset);
 
@@ -91,7 +89,7 @@ public class ObtenerSolicitudesPorEstadoUseCaseTest {
                 .expectErrorMatches(throwable ->
                         throwable instanceof ErrorValidacion &&
                                 "Estado no encontrado".equals(throwable.getMessage()) &&
-                                ((ErrorValidacion) throwable).getCampos().contains("estadoId")
+                                ((ErrorValidacion) throwable).getCampos().contains("estadoId : " + estadoId)
                 )
                 .verify();
     }

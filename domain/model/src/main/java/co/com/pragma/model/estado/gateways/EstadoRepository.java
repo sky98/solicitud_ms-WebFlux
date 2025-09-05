@@ -1,8 +1,8 @@
 package co.com.pragma.model.estado.gateways;
 
+import co.com.pragma.model.estado.Estado;
 import reactor.core.publisher.Mono;
 
 public interface EstadoRepository {
-    Mono<String> obtenerNombreEstadoPorId(Long id);
-    Mono<Boolean> existeEstadoPorId(Long id);
+    Mono<Estado> obtenerPorId(Long id);
 }

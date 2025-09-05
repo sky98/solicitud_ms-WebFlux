@@ -20,11 +20,6 @@ public class DetallesSolicitudes {
     private BigDecimal salarioBase;
     private String nombresUsuario;
     private String apellidosUsuario;
-    /*private BigDecimal monto;
-    private Long plazo;
-    private String estadoSolicitud;
-    private String tipoPrestamo;
-    private BigDecimal tasaInteresPrestamo;*/
     private List<SolicitudResponse> solicitudes;
     private BigDecimal deudaTotalMensualSolicitudesAprobadas;
 }

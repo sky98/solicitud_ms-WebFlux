@@ -19,4 +19,5 @@ public class SolicitudResponse {
     private Long plazo;
     private String estado;
     private String tipoPrestamo;
+    private BigDecimal tasaInteres;
 }

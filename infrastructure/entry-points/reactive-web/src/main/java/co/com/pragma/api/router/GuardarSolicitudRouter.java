@@ -2,12 +2,16 @@ package co.com.pragma.api.router;
 
 import co.com.pragma.api.dto.request.CrearSolicitudRequestDTO;
 import co.com.pragma.api.dto.response.SolicitudResponse;
+import co.com.pragma.api.handlers.AccessDeniedHandler;
+import co.com.pragma.api.handlers.AuthenticationEntryPoint;
+import co.com.pragma.api.handlers.GlobalExceptionHandler;
 import co.com.pragma.api.handlers.Handler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.RouterOperation;
@@ -51,6 +55,7 @@ public class GuardarSolicitudRouter {
                                     schema = @Schema(implementation = CrearSolicitudRequestDTO.class)
                             )
                     ),
+                    security = @SecurityRequirement(name = "Bearer Authentication"),
                     responses = {
                             @ApiResponse(
                                     responseCode = "201",
@@ -60,12 +65,17 @@ public class GuardarSolicitudRouter {
                             @ApiResponse(
                                     responseCode = "400",
                                     description = "Solicitud inválida o error en los datos",
-                                    content = @Content(schema = @Schema(implementation = Exception.class))
+                                    content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.class))
+                            ),
+                            @ApiResponse(
+                                    responseCode = "401",
+                                    description = "No autorizado, el usuario no ha enviado un token de autenticación o el token es inválido.",
+                                    content = @Content(schema = @Schema(implementation = AuthenticationEntryPoint.class))
                             ),
                             @ApiResponse(
                                     responseCode = "403",
-                                    description = "Acceso denegado, el usuario no tiene los permisos necesarios",
-                                    content = @Content(schema = @Schema(implementation = Exception.class))
+                                    description = "Acceso denegado, el usuario no tiene los permisos necesarios (rol 'empleado').",
+                                    content = @Content(schema = @Schema(implementation = AccessDeniedHandler.class))
                             )
                     }
             )
