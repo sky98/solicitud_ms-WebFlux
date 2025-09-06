@@ -45,8 +45,8 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
 
     @Override
     public Flux<Solicitud> obtenerSolicitudesPorEstado(Integer estadoId, Integer limit, Integer offset) {
+        log.info("Consultando solicitudes con estadoId : {}", estadoId);
         return repository.findByEstadoIdWithPagination(Long.valueOf(estadoId), limit, offset)
-                .doOnNext(solicitudes -> log.info("Se consultaron con exito las solicitudes con estadoId : {}", estadoId))
                 .onErrorResume(e -> {
                     log.error("Se genero un error al consultar solicitudes con estadoId : {}", estadoId);
                     return Mono.error(new ErrorPersistencia("Error al consultar solicitudes por estado", Set.of(e.getMessage())));

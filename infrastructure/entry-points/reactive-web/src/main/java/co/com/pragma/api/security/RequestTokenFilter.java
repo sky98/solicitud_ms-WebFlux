@@ -20,26 +20,23 @@ public class RequestTokenFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        return extractJwt(exchange)
-                .flatMap(jwt -> autenticateManager(exchange, chain, jwt))
-                .switchIfEmpty(chain.filter(exchange));
-    }
-
-    private Mono<String> extractJwt(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return Mono.just(authHeader.substring(7));
-        }
-        return Mono.empty();
-    }
 
-    private Mono<Void> autenticateManager(ServerWebExchange exchange, WebFilterChain chain, String authToken){
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return chain.filter(exchange);
+        }
+
+        String authToken = authHeader.substring(7);
+
         log.info("Inicia validacion y autenticacion en el contexto de spring");
         return Mono.just(new UsernamePasswordAuthenticationToken(authToken, authToken))
                 .flatMap(jwtAuthenticateManager::authenticate)
                 .flatMap(authentication -> chain.filter(exchange)
-                        .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication))
-                );
+                        .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication)))
+                .onErrorResume(e -> {
+                    log.error("Authentication failed: {}", e.getMessage());
+                    return chain.filter(exchange);
+                });
     }
 
 }
