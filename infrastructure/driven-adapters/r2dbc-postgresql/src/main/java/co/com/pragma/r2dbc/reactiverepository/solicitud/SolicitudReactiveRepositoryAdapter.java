@@ -3,12 +3,13 @@ package co.com.pragma.r2dbc.reactiverepository.solicitud;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.r2dbc.entity.SolicitudEntity;
-import co.com.pragma.r2dbc.errores.ErrorPersistencia;
+import co.com.pragma.errores.ErrorPersistencia;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -39,6 +40,26 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
                 .onErrorResume(e -> {
                     log.error(MENSAJE_ERROR + "{}", e.getMessage());
                     return Mono.error(new ErrorPersistencia(MENSAJE_ERROR + e.getMessage(), Set.of(e.getMessage())));
+                });
+    }
+
+    @Override
+    public Flux<Solicitud> obtenerSolicitudesPorEstado(Integer estadoId, Integer limit, Integer offset) {
+        log.info("Consultando solicitudes con estadoId : {}", estadoId);
+        return repository.findByEstadoIdWithPagination(Long.valueOf(estadoId), limit, offset)
+                .onErrorResume(e -> {
+                    log.error("Se genero un error al consultar solicitudes con estadoId : {}", estadoId);
+                    return Mono.error(new ErrorPersistencia("Error al consultar solicitudes por estado", Set.of(e.getMessage())));
+                });
+    }
+
+    @Override
+    public Mono<Long> contarSolicitudesPorEstado(Integer estadoId) {
+        return repository.contarSolicitudesPorEstado(estadoId)
+                .doOnNext(solicitudes -> log.info("Se consulto con exito el numero total de las solicitudes con estadoId : {}", estadoId))
+                .onErrorResume(e -> {
+                    log.error("Se genero un error al consultar en numero total de las solicitudes con estadoId : {}", estadoId);
+                    return Mono.error(new ErrorPersistencia("Error al consultar total de solicitudes por estado", Set.of(e.getMessage())));
                 });
     }
 }

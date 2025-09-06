@@ -2,7 +2,7 @@ package co.com.pragma.r2dbc.reactiverepository;
 
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.r2dbc.entity.SolicitudEntity;
-import co.com.pragma.r2dbc.errores.ErrorPersistencia;
+import co.com.pragma.errores.ErrorPersistencia;
 import co.com.pragma.r2dbc.reactiverepository.solicitud.SolicitudReactiveRepository;
 import co.com.pragma.r2dbc.reactiverepository.solicitud.SolicitudReactiveRepositoryAdapter;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.reactive.TransactionCallback;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -21,14 +20,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SolicitudReactiveRepositoryAdapterTest {
+public class EstadoEstadoSolicitudReactiveRepositoryAdapterTest {
 
     @Mock
     private SolicitudReactiveRepository repository;

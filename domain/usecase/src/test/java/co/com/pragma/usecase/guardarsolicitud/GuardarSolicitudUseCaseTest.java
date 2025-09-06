@@ -4,7 +4,7 @@ import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.fabricas.SolicitudFabrica;
 import co.com.pragma.fabricas.TipoPrestamoFabrica;
 import co.com.pragma.model.solicitud.Solicitud;
-import co.com.pragma.model.solicitud.gateways.ResConsumerGateway;
+import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
@@ -33,28 +33,29 @@ public class GuardarSolicitudUseCaseTest {
     @Mock
     private TipoPrestamoRepository mockTipoPrestamoRepository;
     @Mock
-    private ResConsumerGateway mockResConsumerGateway;
+    private UsuarioResConsumerGateway mockUsuarioResConsumerGateway;
 
     @InjectMocks
     private GuardarSolicitudUseCase useCase;
 
     private Solicitud solicitudBuilder = SolicitudFabrica.builder().build();
     private TipoPrestamo tipoPrestamoBuilder = TipoPrestamoFabrica.builder().build();
+    private final String usuarioAutenticado = "1233456";
 
     @Test
     void testGuardarSolicitud_TodoCorrecto_DebeGuardar(){
-        when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
+        when(mockUsuarioResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(tipoPrestamoBuilder));
         when(mockTipoPrestamoRepository.existeMontoEnRango(anyLong(), any(BigDecimal.class))).thenReturn(Mono.just(true));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudBuilder));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, usuarioAutenticado);
 
         StepVerifier.create(resultado)
                 .expectNextMatches(solicitud -> solicitud.getSolicitudId() != null)
                 .verifyComplete();
 
-        verify(mockResConsumerGateway).validarUsuarioPorDocumentoId(solicitudBuilder.getDocumentoId());
+        verify(mockUsuarioResConsumerGateway).validarUsuarioPorDocumentoId(solicitudBuilder.getDocumentoId());
         verify(mockTipoPrestamoRepository).obtenerPorId(solicitudBuilder.getTipoPrestamoId());
         verify(mockTipoPrestamoRepository).existeMontoEnRango(solicitudBuilder.getTipoPrestamoId(), solicitudBuilder.getMonto());
         verify(mockSolicitudRepository).guardar(solicitudBuilder);
@@ -62,9 +63,9 @@ public class GuardarSolicitudUseCaseTest {
 
     @Test
     void testGuardarSolicitud_UsuarioNoExiste_DebeLanzarErrorDominio(){
-        when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(false));
+        when(mockUsuarioResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(false));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, usuarioAutenticado);
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
@@ -80,10 +81,10 @@ public class GuardarSolicitudUseCaseTest {
 
     @Test
     void testGuardarSolicitud_TipoPrestamoNoExiste_DebeLanzarErrorDominio(){
-        when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
+        when(mockUsuarioResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.empty());
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, usuarioAutenticado);
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
@@ -99,17 +100,33 @@ public class GuardarSolicitudUseCaseTest {
 
     @Test
     void testGuardarSolicitud_MontoNoCumpleRango_DebeLanzarErrorDominio(){
-        when(mockResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
+        when(mockUsuarioResConsumerGateway.validarUsuarioPorDocumentoId(anyLong())).thenReturn(Mono.just(true));
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(tipoPrestamoBuilder));
         when(mockTipoPrestamoRepository.existeMontoEnRango(anyLong(), any(BigDecimal.class))).thenReturn(Mono.just(false));
 
-        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder);
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, usuarioAutenticado);
 
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
                         throwable instanceof ErrorDominio &&
                                 throwable.getMessage().equals("Monto no cumnple con el rango del tipo de prestamo") &&
                                 ((ErrorDominio) throwable).getCampos().equals(Set.of("monto"))
+                )
+                .verify();
+
+        verify(mockSolicitudRepository, never()).guardar(any(Solicitud.class));
+    }
+
+    @Test
+    void testGuardarSolicitud_QuienRealizaLaPeticionNoEsQuienSolicita_DebeLanzarErrorDominio(){
+
+        Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, "1");
+
+        StepVerifier.create(resultado)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ErrorDominio &&
+                                throwable.getMessage().equals("El documento de la solicitud no coincide con el documento del usuario autenticado.") &&
+                                ((ErrorDominio) throwable).getCampos().equals(Set.of("usuario:documentoId"))
                 )
                 .verify();
 

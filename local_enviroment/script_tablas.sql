@@ -25,10 +25,9 @@ CREATE TABLE solicitud.`solicitudes` (
 );
 
 INSERT INTO `estados` (`nombre`, `descripcion`) VALUES
-('Pendiente', 'La solicitud ha sido recibida y está en espera de revisión.'),
-('Aprobada', 'La solicitud ha sido aprobada y el préstamo será desembolsado.'),
-('Rechazada', 'La solicitud ha sido rechazada y no se concederá el préstamo.'),
-('Desembolsada', 'El dinero del préstamo ha sido entregado al solicitante.');
+('Pendiente de revision', 'La solicitud ha sido recibida y está en espera de revisión.'),
+('Rechazada', 'La solicitud ha sido rechazada y no se concedera el prestamo.'),
+('Revision manual', 'La solicitud esta en estado pendiente de revision manual.');
 
 INSERT INTO `tipo_prestamos` (`nombre`, `monto_minimo`, `monto_maximo`, `tasa_interes`, `validacion_automatica`) VALUES
 ('Personal', 1000.00, 50000.00, 10.50, 'SI'),

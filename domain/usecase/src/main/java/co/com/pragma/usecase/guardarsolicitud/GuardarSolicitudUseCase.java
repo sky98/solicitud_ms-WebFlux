@@ -2,7 +2,7 @@ package co.com.pragma.usecase.guardarsolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.model.solicitud.Solicitud;
-import co.com.pragma.model.solicitud.gateways.ResConsumerGateway;
+import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +15,24 @@ public class GuardarSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
-    private final ResConsumerGateway resConsumerGateway;
+    private final UsuarioResConsumerGateway usuarioResConsumerGateway;
 
-    public Mono<Solicitud> ejecutar(Solicitud solicitud){
-        return resConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
-                .flatMap(usuarioExiste -> Boolean.TRUE.equals(usuarioExiste)
-                        ? gestionInterna(solicitud)
-                        : Mono.error(new ErrorDominio(
-                                String.format("Usuario con documentoId: %d no existe en el sistema", solicitud.getDocumentoId()),
-                        Set.of("usuario:documentoId")))
+    public Mono<Solicitud> ejecutar(Solicitud solicitud, String usuarioAutenticado){
+        return Mono.defer(() -> {
+                    if (!String.valueOf(solicitud.getDocumentoId()).equals(usuarioAutenticado)) {
+                        return Mono.error(new ErrorDominio(
+                                "El documento de la solicitud no coincide con el documento del usuario autenticado.",
+                                Set.of("usuario:documentoId")));
+                    }
+                    return Mono.just(solicitud);
+                })
+                .flatMap(validatedSolicitud ->
+                        usuarioResConsumerGateway.validarUsuarioPorDocumentoId(solicitud.getDocumentoId())
+                                .flatMap(usuarioExiste -> Boolean.TRUE.equals(usuarioExiste)
+                                        ? gestionInterna(solicitud)
+                                        : Mono.error(new ErrorDominio(
+                                        String.format("Usuario con documentoId: %d no existe en el sistema", solicitud.getDocumentoId()),
+                                        Set.of("usuario:documentoId"))))
                 );
     }
 

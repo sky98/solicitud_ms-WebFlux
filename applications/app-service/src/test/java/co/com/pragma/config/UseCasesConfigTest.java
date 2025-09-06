@@ -1,6 +1,6 @@
 package co.com.pragma.config;
 
-import co.com.pragma.model.solicitud.gateways.ResConsumerGateway;
+import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import org.junit.jupiter.api.Test;
@@ -50,8 +50,8 @@ public class UseCasesConfigTest {
         }
 
         @Bean
-        public ResConsumerGateway resConsumerGateway(){
-            return Mockito.mock(ResConsumerGateway.class);
+        public UsuarioResConsumerGateway resConsumerGateway(){
+            return Mockito.mock(UsuarioResConsumerGateway.class);
         }
     }
 

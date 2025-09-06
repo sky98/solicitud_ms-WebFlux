@@ -1,6 +1,6 @@
 package co.com.pragma.api.validador;
 
-import co.com.pragma.api.errores.ErrorValidacion;
+import co.com.pragma.errores.ErrorValidacion;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;

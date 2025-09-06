@@ -31,6 +31,12 @@ management:
   health:
     circuitbreakers:
       enabled: true
+
+jwt:
+  secret: ZXN0YSBlcyB1bmEgY2xhdmUgc2VjcmV0YSBwYXJhIHVuIHByb3llY3RvIGRlIHNwcmluZ3dlYmZsdXg
+  expiration:
+    millis: 3600000
+
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 adapter:
