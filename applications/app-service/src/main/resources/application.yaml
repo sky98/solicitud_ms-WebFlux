@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: ${SOL_PORT}
 spring:
   application:
     name: "solicitudes"
@@ -13,12 +13,12 @@ spring:
     include: null
 adapters:
   r2dbc:
-    host: "localhost"
-    port: 3306
-    database: "solicitud"
+    host: ${SOL_DB_HOST}
+    port: ${SOL_DB_PORT}
+    database: ${SOL_DB_NAME}
     schema: "public"
-    username: "root"
-    password: "user"
+    username: ${SOL_DB_USER}
+    password: ${SOL_DB_PASSWORD}
 management:
   endpoints:
     web:
@@ -42,7 +42,7 @@ cors:
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://localhost:8080"
+    url: "http://autenticacion:${AUTH_PORT}"
 resilience4j:
   circuitbreaker:
     instances:
