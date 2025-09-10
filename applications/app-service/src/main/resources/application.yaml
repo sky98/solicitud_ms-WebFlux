@@ -1,5 +1,5 @@
 server:
-  port: ${SOL_PORT}
+  port: "${SOL_PORT}"
 spring:
   application:
     name: "solicitudes"
@@ -13,12 +13,12 @@ spring:
     include: null
 adapters:
   r2dbc:
-    host: ${SOL_DB_HOST}
-    port: ${DB_PORT}
-    database: ${SOL_DB_NAME}
+    host: "${SOL_DB_HOST}"
+    port: "${DB_PORT}"
+    database: "${SOL_DB_NAME}"
     schema: "public"
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    username: "${DB_USER}"
+    password: "${DB_PASSWORD}"
 management:
   endpoints:
     web:
@@ -31,18 +31,19 @@ management:
   health:
     circuitbreakers:
       enabled: true
-
 jwt:
-  secret: ${JWT_SECRET}
+  secret: "${JWT_SECRET}"
   expiration:
     millis: 3600000
-
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 adapter:
   restconsumer:
     timeout: 5000
     url: "http://autenticacion:${AUTH_PORT}"
+  sqs:
+    region: "${AWS_REGION}"
+    queueUrl: "${SQS_QUEUE_URL}"
 resilience4j:
   circuitbreaker:
     instances:

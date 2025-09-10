@@ -16,4 +16,6 @@ public interface SolicitudReactiveRepository extends ReactiveCrudRepository<Soli
     @Query("SELECT COUNT(*) FROM solicitudes WHERE estado_id = :estadoId")
     Mono<Long> contarSolicitudesPorEstado(Integer estadoId);
 
+    Mono<Solicitud> findBySolicitudId(Long solicitudId);
+
 }
