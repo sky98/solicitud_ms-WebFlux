@@ -5,7 +5,7 @@ import co.com.pragma.fabricas.EstadoFabrica;
 import co.com.pragma.fabricas.SolicitudFabrica;
 import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeRepository;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
     @Mock
     private EstadoRepository mockEstadoRepository;
     @Mock
-    private MensajeRepository mockMensajeRepository;
+    private MensajeSQSGateway mockMensajeSQSGateway;
     @InjectMocks
     private ActualizarEstadoSolicitudUseCase useCase;
 
@@ -72,7 +72,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         when(mockSolicitudRepository.obtenerSolicitudPorId(anyLong())).thenReturn(Mono.just(solicitudExistente));
         when(mockEstadoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(estadoAprobado));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudAActualizar));
-        when(mockMensajeRepository.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.empty());
+        when(mockMensajeSQSGateway.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.empty());
 
         Mono<Solicitud> resultado = useCase.ejecutar(solicitudAActualizar);
 
@@ -83,7 +83,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         verify(mockSolicitudRepository).obtenerSolicitudPorId(solicitudAActualizar.getSolicitudId());
         verify(mockEstadoRepository).obtenerPorId(solicitudAActualizar.getEstadoId());
         verify(mockSolicitudRepository).guardar(any(Solicitud.class));
-        verify(mockMensajeRepository).enviarSolicitudActualizada(solicitudAActualizar);
+        verify(mockMensajeSQSGateway).enviarSolicitudActualizada(solicitudAActualizar);
         verify(mockSolicitudRepository, never()).rollback(any(Solicitud.class));
     }
 
@@ -92,7 +92,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         when(mockSolicitudRepository.obtenerSolicitudPorId(anyLong())).thenReturn(Mono.just(solicitudExistente));
         when(mockEstadoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(estadoRechazado));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudAActualizarRechazada));
-        when(mockMensajeRepository.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.empty());
+        when(mockMensajeSQSGateway.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.empty());
 
         Mono<Solicitud> resultado = useCase.ejecutar(solicitudAActualizarRechazada);
 
@@ -103,7 +103,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         verify(mockSolicitudRepository).obtenerSolicitudPorId(solicitudAActualizarRechazada.getSolicitudId());
         verify(mockEstadoRepository).obtenerPorId(solicitudAActualizarRechazada.getEstadoId());
         verify(mockSolicitudRepository).guardar(any(Solicitud.class));
-        verify(mockMensajeRepository).enviarSolicitudActualizada(any(Solicitud.class));
+        verify(mockMensajeSQSGateway).enviarSolicitudActualizada(any(Solicitud.class));
         verify(mockSolicitudRepository, never()).rollback(any(Solicitud.class));
     }
 
@@ -166,7 +166,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         when(mockSolicitudRepository.obtenerSolicitudPorId(anyLong())).thenReturn(Mono.just(solicitudExistente));
         when(mockEstadoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(estadoAprobado));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudAActualizar));
-        when(mockMensajeRepository.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.error(new RuntimeException("Fallo en la cola de mensajes")));
+        when(mockMensajeSQSGateway.enviarSolicitudActualizada(any(Solicitud.class))).thenReturn(Mono.error(new RuntimeException("Fallo en la cola de mensajes")));
         when(mockSolicitudRepository.rollback(any(Solicitud.class))).thenReturn(Mono.just(solicitudExistente));
 
         Mono<Solicitud> resultado = useCase.ejecutar(solicitudAActualizar);
@@ -178,7 +178,7 @@ public class ActualizarEstadoSolicitudUseCaseTest {
         verify(mockSolicitudRepository).obtenerSolicitudPorId(solicitudAActualizar.getSolicitudId());
         verify(mockEstadoRepository).obtenerPorId(solicitudAActualizar.getEstadoId());
         verify(mockSolicitudRepository).guardar(any(Solicitud.class));
-        verify(mockMensajeRepository).enviarSolicitudActualizada(solicitudAActualizar);
+        verify(mockMensajeSQSGateway).enviarSolicitudActualizada(solicitudAActualizar);
         verify(mockSolicitudRepository).rollback(solicitudExistente);
     }
 

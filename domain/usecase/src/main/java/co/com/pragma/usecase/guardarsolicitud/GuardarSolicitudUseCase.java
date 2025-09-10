@@ -1,7 +1,9 @@
 package co.com.pragma.usecase.guardarsolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
 import co.com.pragma.model.solicitud.Solicitud;
+import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
@@ -16,6 +18,7 @@ public class GuardarSolicitudUseCase {
     private final SolicitudRepository solicitudRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
     private final UsuarioResConsumerGateway usuarioResConsumerGateway;
+    private final MensajeSQSGateway mensajeSQSGateway;
 
     public Mono<Solicitud> ejecutar(Solicitud solicitud, String usuarioAutenticado){
         return Mono.defer(() -> {
@@ -45,5 +48,18 @@ public class GuardarSolicitudUseCase {
                         ? solicitudRepository.guardar(solicitud)
                         : Mono.error(new ErrorDominio("Monto no cumnple con el rango del tipo de prestamo", Set.of("monto")))
                 );
+    }
+
+    private Mono<Solicitud> guardarYValidarCalculoCapacidadEndeudamiento(Boolean cumpleMonto, TipoPrestamo tipoPrestamo, Solicitud solicitud){
+        return Mono.just(cumpleMonto)
+                .flatMap(esValido ->
+                        esValido ? solicitudRepository.guardar(solicitud)
+                                : Mono.error(new ErrorDominio("Monto no cumple con el rango del tipo de prestamo", Set.of("monto")))
+                )
+                .flatMap(solicitudGuardada ->
+                        tipoPrestamo.getValidacionAutomatica().equals("SI")
+                                ? mensajeSQSGateway.calcularCapacidadEndeudamiento(solicitud)
+                                : Mono.just(solicitud)
+                        );
     }
 }

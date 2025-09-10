@@ -4,7 +4,7 @@ import co.com.pragma.consecuencias.ActualizarEstadoSolicitudMensaje;
 import co.com.pragma.errores.ErrorSQS;
 import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeRepository;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
@@ -19,7 +19,7 @@ import java.util.Set;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ActualizarEstadoSolicitudSender implements MensajeRepository {
+public class ActualizarEstadoSolicitudSender implements MensajeSQSGateway {
 
     private final EstadoRepository estadoRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
@@ -40,6 +40,11 @@ public class ActualizarEstadoSolicitudSender implements MensajeRepository {
                     );
                 })
                 .map(resp -> modelo);
+    }
+
+    @Override
+    public Mono<Solicitud> calcularCapacidadEndeudamiento(Solicitud solicitud) {
+        return null;
     }
 
     private Mono<ActualizarEstadoSolicitudMensaje> transformarEstadoYTipoPrestamo(ActualizarEstadoSolicitudMensaje msj){
