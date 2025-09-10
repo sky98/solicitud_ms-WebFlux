@@ -10,10 +10,10 @@ import reactor.core.publisher.Mono;
 
 public interface SolicitudReactiveRepository extends ReactiveCrudRepository<SolicitudEntity, String>, ReactiveQueryByExampleExecutor<SolicitudEntity> {
 
-    @Query("SELECT * FROM solicitud.solicitudes WHERE estado_id = :estadoId ORDER BY solicitud_id LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM solicitudes WHERE estado_id = :estadoId ORDER BY solicitud_id LIMIT :limit OFFSET :offset")
     Flux<Solicitud> findByEstadoIdWithPagination(Long estadoId, Integer limit, Integer offset);
 
-    @Query("SELECT COUNT(*) FROM solicitud.solicitudes WHERE estado_id = :estadoId")
+    @Query("SELECT COUNT(*) FROM solicitudes WHERE estado_id = :estadoId")
     Mono<Long> contarSolicitudesPorEstado(Integer estadoId);
 
 }

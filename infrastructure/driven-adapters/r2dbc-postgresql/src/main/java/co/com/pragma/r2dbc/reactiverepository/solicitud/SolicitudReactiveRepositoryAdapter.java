@@ -58,7 +58,7 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
         return repository.contarSolicitudesPorEstado(estadoId)
                 .doOnNext(solicitudes -> log.info("Se consulto con exito el numero total de las solicitudes con estadoId : {}", estadoId))
                 .onErrorResume(e -> {
-                    log.error("Se genero un error al consultar en numero total de las solicitudes con estadoId : {}", estadoId);
+                    log.error("Se genero un error al consultar el numero total de las solicitudes con estadoId : {}", estadoId);
                     return Mono.error(new ErrorPersistencia("Error al consultar total de solicitudes por estado", Set.of(e.getMessage())));
                 });
     }

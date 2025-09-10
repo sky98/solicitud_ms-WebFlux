@@ -14,11 +14,11 @@ spring:
 adapters:
   r2dbc:
     host: ${SOL_DB_HOST}
-    port: ${SOL_DB_PORT}
+    port: ${DB_PORT}
     database: ${SOL_DB_NAME}
     schema: "public"
-    username: ${SOL_DB_USER}
-    password: ${SOL_DB_PASSWORD}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 management:
   endpoints:
     web:
@@ -33,7 +33,7 @@ management:
       enabled: true
 
 jwt:
-  secret: ZXN0YSBlcyB1bmEgY2xhdmUgc2VjcmV0YSBwYXJhIHVuIHByb3llY3RvIGRlIHNwcmluZ3dlYmZsdXg
+  secret: ${JWT_SECRET}
   expiration:
     millis: 3600000
 
