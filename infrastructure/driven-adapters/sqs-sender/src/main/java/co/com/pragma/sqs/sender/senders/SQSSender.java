@@ -23,22 +23,22 @@ public class SQSSender {
     private final SQSSenderProperties properties;
     private final SqsAsyncClient client;
 
-    public Mono<String> send(String message) {
-        return Mono.fromCallable(() -> buildRequest(message))
+    public Mono<String> send(String message, String cola) {
+        return Mono.fromCallable(() -> buildRequest(message, cola))
                 .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
                 .doOnNext(response -> log.debug("Message sent {}", response.messageId()))
                 .map(SendMessageResponse::messageId);
     }
 
-    private SendMessageRequest buildRequest(String message) {
+    private SendMessageRequest buildRequest(String message, String cola) {
         return SendMessageRequest.builder()
-                .queueUrl(properties.queueUrl())
+                .queueUrl(properties.queueUrl() + cola)
                 .messageBody(message)
                 .build();
     }
 
     public  <T> Mono<String> serializar(T object){
-        String data = null;
+        String data;
         try{
             data = objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e){

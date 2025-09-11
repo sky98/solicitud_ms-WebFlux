@@ -44,10 +44,11 @@ public class GuardarSolicitudUseCase {
                 .switchIfEmpty(Mono.error(new ErrorDominio("El tipo de prestamo no existe", Set.of("tipoPrestamoId"))))
                 .flatMap(
                         tipoPrestamo -> tipoPrestamoRepository.existeMontoEnRango(tipoPrestamo.getTipoPrestamoId(), solicitud.getMonto())
-                ).flatMap(cumpleMonto -> cumpleMonto
+                                .flatMap(montoRango -> guardarYValidarCalculoCapacidadEndeudamiento(montoRango, tipoPrestamo, solicitud))
+                )/*.flatMap(cumpleMonto -> cumpleMonto
                         ? solicitudRepository.guardar(solicitud)
                         : Mono.error(new ErrorDominio("Monto no cumnple con el rango del tipo de prestamo", Set.of("monto")))
-                );
+                )*/;
     }
 
     private Mono<Solicitud> guardarYValidarCalculoCapacidadEndeudamiento(Boolean cumpleMonto, TipoPrestamo tipoPrestamo, Solicitud solicitud){

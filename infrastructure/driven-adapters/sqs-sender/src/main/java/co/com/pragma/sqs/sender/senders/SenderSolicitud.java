@@ -1,0 +1,105 @@
+package co.com.pragma.sqs.sender.senders;
+
+import co.com.pragma.consecuencias.ActualizarEstadoSolicitudMensaje;
+import co.com.pragma.consecuencias.CalcularCapacidadEndeudamientoMensaje;
+import co.com.pragma.errores.ErrorSQS;
+import co.com.pragma.model.estado.Estado;
+import co.com.pragma.model.estado.gateways.EstadoRepository;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.solicitud.Solicitud;
+import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
+import co.com.pragma.model.tipoprestamo.TipoPrestamo;
+import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
+import co.com.pragma.model.usuario.Usuario;
+import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
+import co.com.pragma.sqs.sender.mapper.ActualizarEstadoSolicitudMensajeMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Set;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class SenderSolicitud implements MensajeSQSGateway {
+
+    private final EstadoRepository estadoRepository;
+    private final TipoPrestamoRepository tipoPrestamoRepository;
+    private final SolicitudRepository solicitudRepository;
+    private final UsuarioResConsumerGateway usuarioResConsumerGateway;
+    private final ActualizarEstadoSolicitudMensajeMapper mapper;
+    private final SQSSender sqsSender;
+
+    private static String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
+    private static String QUEUE_CAPACIDAD_ENDEUDAMIENTO = "/capacidad-endeudamiento";
+
+    @Override
+    public Mono<Solicitud> enviarSolicitudActualizada(Solicitud modelo) {
+        return Mono.fromCallable(() -> mapper.toMessage(modelo))
+                .flatMap(this::transformarEstadoYTipoPrestamo)
+                .flatMap(sqsSender::serializar)
+                .flatMap(msj -> sqsSender.send(msj,QUEUE_ACTUALIZAR_ESTADO_SOLICITUD))
+                .doOnSuccess(token -> log.info("Mensaje enviado con exito : {}", token))
+                .onErrorResume(e -> {
+                    log.error("Se ha generado un error al enviar mensaje a SQS : {}", e.getMessage());
+                    return Mono.error(
+                            new ErrorSQS("Se ha generado un error al enviar mensaje a SQS : " + e.getMessage(), Set.of(e.getMessage()))
+                    );
+                })
+                .map(resp -> modelo);
+    }
+
+    @Override
+    public Mono<Solicitud> calcularCapacidadEndeudamiento(Solicitud solicitud) {
+        return obtenerDatosParaCalculoDeCapacidadDeEndeudamiento(solicitud)
+                .flatMap(sqsSender::serializar)
+                .flatMap(msj -> sqsSender.send(msj, QUEUE_CAPACIDAD_ENDEUDAMIENTO))
+                .doOnSuccess(token -> log.info("Mensaje enviado a la cola para calculo de endeudamiento con exito : {}", token))
+                .onErrorResume(e ->{
+                    log.error("Se ha generado un error al enviar mensaje a SQS : {}", e.getMessage());
+                    return Mono.error(
+                            new ErrorSQS("Se ha generado un error al enviar mensaje a SQS : " + e.getMessage(), Set.of(e.getMessage()))
+                    );
+                }).thenReturn(solicitud);
+    }
+
+    private Mono<ActualizarEstadoSolicitudMensaje> transformarEstadoYTipoPrestamo(ActualizarEstadoSolicitudMensaje msj){
+        Mono<Estado> monoEstado = estadoRepository.obtenerPorId(Long.valueOf(msj.getEstado()));
+        Mono<TipoPrestamo> monoTipoPrestamo = tipoPrestamoRepository.obtenerPorId(Long.valueOf(msj.getTipoPrestamo()));
+        return Mono.zip(monoEstado, monoTipoPrestamo)
+                .map(tupla -> {
+                    msj.setTipoPrestamo(tupla.getT2().getNombre());
+                    msj.setEstado(tupla.getT1().getNombre());
+                    return msj;
+                });
+    }
+
+    private Mono<CalcularCapacidadEndeudamientoMensaje> obtenerDatosParaCalculoDeCapacidadDeEndeudamiento(Solicitud solicitud){
+        Mono<TipoPrestamo> tipoPrestamoMono = tipoPrestamoRepository.obtenerPorId(solicitud.getTipoPrestamoId());
+        Mono<List<Solicitud>> listSolicitudesMono = solicitudRepository.obtenerSolicitudesPorDocumentoIdAprobadas(solicitud.getDocumentoId())
+                .collectList();
+        Mono<Usuario> usuarioMono = usuarioResConsumerGateway.obtenerUsuarioPorDocumentoId(solicitud.getDocumentoId());
+
+        return Mono.zip(
+                tipoPrestamoMono,
+                listSolicitudesMono,
+                usuarioMono,
+                Mono.just(solicitud)
+        ).map(tuple4 -> construirMensajeCalcularCapacidadEndeudamiento(tuple4.getT4(), tuple4.getT3(), tuple4.getT1(), tuple4.getT2()));
+    }
+
+    private CalcularCapacidadEndeudamientoMensaje construirMensajeCalcularCapacidadEndeudamiento(Solicitud solicitud, Usuario usuario, TipoPrestamo tipoPrestamo, List<Solicitud> solicitudes){
+        return CalcularCapacidadEndeudamientoMensaje.builder()
+                .monto(solicitud.getMonto())
+                .plazo(solicitud.getPlazo())
+                .salarioBase(usuario.getSalarioBase())
+                .tasaInteresMensual(tipoPrestamo.getTasaInteres())
+                .tipoPrestamoId(solicitud.getTipoPrestamoId())
+                .documentoId(solicitud.getDocumentoId())
+                .solicitudes(solicitudes)
+                .build();
+    }
+}
