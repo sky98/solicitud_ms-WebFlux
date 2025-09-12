@@ -1,6 +1,5 @@
-package co.com.pragma.consecuencias;
+package co.com.pragma.sqs.sender.mensajes;
 
-import co.com.pragma.model.solicitud.Solicitud;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +19,7 @@ public class CalcularCapacidadEndeudamientoMensaje {
     private Long plazo;
     private BigDecimal salarioBase;
     private BigDecimal tasaInteresMensual;
-    private Long tipoPrestamoId;
+    private String tipoPrestamo;
     private Long documentoId;
-    private List<Solicitud> solicitudes;
+    private List<SolicitudLite> solicitudes;
 }

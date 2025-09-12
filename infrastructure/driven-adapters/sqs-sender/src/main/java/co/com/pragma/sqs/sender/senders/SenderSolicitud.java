@@ -1,7 +1,7 @@
 package co.com.pragma.sqs.sender.senders;
 
-import co.com.pragma.consecuencias.ActualizarEstadoSolicitudMensaje;
-import co.com.pragma.consecuencias.CalcularCapacidadEndeudamientoMensaje;
+import co.com.pragma.sqs.sender.mensajes.ActualizarEstadoSolicitudMensaje;
+import co.com.pragma.sqs.sender.mensajes.CalcularCapacidadEndeudamientoMensaje;
 import co.com.pragma.errores.ErrorSQS;
 import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
@@ -12,14 +12,19 @@ import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
 import co.com.pragma.model.usuario.Usuario;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
-import co.com.pragma.sqs.sender.mapper.ActualizarEstadoSolicitudMensajeMapper;
+import co.com.pragma.sqs.sender.mapper.SolicitudMensajeMapper;
+import co.com.pragma.sqs.sender.mensajes.SolicitudLite;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,7 +35,7 @@ public class SenderSolicitud implements MensajeSQSGateway {
     private final TipoPrestamoRepository tipoPrestamoRepository;
     private final SolicitudRepository solicitudRepository;
     private final UsuarioResConsumerGateway usuarioResConsumerGateway;
-    private final ActualizarEstadoSolicitudMensajeMapper mapper;
+    private final SolicitudMensajeMapper mapper;
     private final SQSSender sqsSender;
 
     private static String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
@@ -82,24 +87,42 @@ public class SenderSolicitud implements MensajeSQSGateway {
         Mono<List<Solicitud>> listSolicitudesMono = solicitudRepository.obtenerSolicitudesPorDocumentoIdAprobadas(solicitud.getDocumentoId())
                 .collectList();
         Mono<Usuario> usuarioMono = usuarioResConsumerGateway.obtenerUsuarioPorDocumentoId(solicitud.getDocumentoId());
+        Mono<List<SolicitudLite>> solicitudesLiteListMono = listSolicitudesMono.flatMap(solicitudes -> {
+            List<Long> tipoPrestamosIdUnicos = solicitudes.stream()
+                    .map(Solicitud::getTipoPrestamoId)
+                    .distinct()
+                    .toList();
+            Mono<Map<Long, BigDecimal>> tasasMapMono = Flux.fromIterable(tipoPrestamosIdUnicos)
+                    .flatMap(tipoPrestamoRepository::obtenerPorId)
+                    .collect(Collectors.toMap(TipoPrestamo::getTipoPrestamoId, TipoPrestamo::getTasaInteres));
+
+            return tasasMapMono.map(tasasMap -> solicitudes.stream()
+                    .map(sol -> SolicitudLite.builder()
+                            .monto(sol.getMonto())
+                            .plazo(sol.getPlazo())
+                            .tasaInteres(tasasMap.getOrDefault(sol.getTipoPrestamoId(), BigDecimal.ZERO))
+                            .build()
+                    ).collect(Collectors.toList())
+            );
+        });
 
         return Mono.zip(
                 tipoPrestamoMono,
-                listSolicitudesMono,
+                solicitudesLiteListMono,
                 usuarioMono,
                 Mono.just(solicitud)
         ).map(tuple4 -> construirMensajeCalcularCapacidadEndeudamiento(tuple4.getT4(), tuple4.getT3(), tuple4.getT1(), tuple4.getT2()));
     }
 
-    private CalcularCapacidadEndeudamientoMensaje construirMensajeCalcularCapacidadEndeudamiento(Solicitud solicitud, Usuario usuario, TipoPrestamo tipoPrestamo, List<Solicitud> solicitudes){
+    private CalcularCapacidadEndeudamientoMensaje construirMensajeCalcularCapacidadEndeudamiento(Solicitud solicitud, Usuario usuario, TipoPrestamo tipoPrestamo, List<SolicitudLite> solicitudesLite){
         return CalcularCapacidadEndeudamientoMensaje.builder()
                 .monto(solicitud.getMonto())
                 .plazo(solicitud.getPlazo())
                 .salarioBase(usuario.getSalarioBase())
                 .tasaInteresMensual(tipoPrestamo.getTasaInteres())
-                .tipoPrestamoId(solicitud.getTipoPrestamoId())
+                .tipoPrestamo(tipoPrestamo.getNombre())
                 .documentoId(solicitud.getDocumentoId())
-                .solicitudes(solicitudes)
+                .solicitudes(solicitudesLite)
                 .build();
     }
 }

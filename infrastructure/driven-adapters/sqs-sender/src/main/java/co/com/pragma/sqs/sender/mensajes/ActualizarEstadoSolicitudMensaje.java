@@ -1,4 +1,4 @@
-package co.com.pragma.consecuencias;
+package co.com.pragma.sqs.sender.mensajes;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -45,10 +45,7 @@ public class GuardarSolicitudUseCase {
                 .flatMap(
                         tipoPrestamo -> tipoPrestamoRepository.existeMontoEnRango(tipoPrestamo.getTipoPrestamoId(), solicitud.getMonto())
                                 .flatMap(montoRango -> guardarYValidarCalculoCapacidadEndeudamiento(montoRango, tipoPrestamo, solicitud))
-                )/*.flatMap(cumpleMonto -> cumpleMonto
-                        ? solicitudRepository.guardar(solicitud)
-                        : Mono.error(new ErrorDominio("Monto no cumnple con el rango del tipo de prestamo", Set.of("monto")))
-                )*/;
+                );
     }
 
     private Mono<Solicitud> guardarYValidarCalculoCapacidadEndeudamiento(Boolean cumpleMonto, TipoPrestamo tipoPrestamo, Solicitud solicitud){
@@ -59,8 +56,8 @@ public class GuardarSolicitudUseCase {
                 )
                 .flatMap(solicitudGuardada ->
                         tipoPrestamo.getValidacionAutomatica().equals("SI")
-                                ? mensajeSQSGateway.calcularCapacidadEndeudamiento(solicitud)
-                                : Mono.just(solicitud)
+                                ? mensajeSQSGateway.calcularCapacidadEndeudamiento(solicitudGuardada)
+                                : Mono.just(solicitudGuardada)
                         );
     }
 }
