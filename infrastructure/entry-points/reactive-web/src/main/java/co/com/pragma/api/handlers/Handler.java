@@ -2,11 +2,13 @@ package co.com.pragma.api.handlers;
 
 import co.com.pragma.api.dto.UsuarioAutenticado;
 import co.com.pragma.api.dto.request.ActualizarEstadoSolicitudRequestDTO;
+import co.com.pragma.api.dto.request.CalcularCapacidadEndeudamientoRequestDTO;
 import co.com.pragma.api.dto.request.CrearSolicitudRequestDTO;
 import co.com.pragma.api.mapper.SolicitudMapper;
 import co.com.pragma.api.validador.ValidadorRequest;
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.usecase.actualizarestadosolicitud.ActualizarEstadoSolicitudUseCase;
+import co.com.pragma.usecase.calcularcapacidadendeudamiento.CalcularCapacidadEndeudamientoUseCase;
 import co.com.pragma.usecase.guardarsolicitud.GuardarSolicitudUseCase;
 import co.com.pragma.usecase.obtenersolicitudesporestado.ObtenerSolicitudesPorEstadoUseCase;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -31,6 +33,7 @@ public class Handler {
     private final GuardarSolicitudUseCase guardarSolicitudUseCase;
     private final ObtenerSolicitudesPorEstadoUseCase obtenerSolicitudesPorEstadoUseCase;
     private final ActualizarEstadoSolicitudUseCase actualizarEstadoSolicitudUseCase;
+    private final CalcularCapacidadEndeudamientoUseCase calcularCapacidadEndeudamientoUseCase;
 
     private final ValidadorRequest validadorRequest;
     private final SolicitudMapper mapper;
@@ -113,6 +116,32 @@ public class Handler {
                 });
 
 
+    }
+
+    @PreAuthorize("hasRole('2')")
+    public Mono<ServerResponse> calcularCapacidadEndeudamiento(ServerRequest serverRequest){
+        return serverRequest.bodyToMono(CalcularCapacidadEndeudamientoRequestDTO.class)
+                .doOnNext(request -> log.info("Iniciando flujo para calcular capacidad de endeudamiento : {}", request))
+                .flatMap(validadorRequest::validar)
+                .flatMap(solicitud -> calcularCapacidadEndeudamientoUseCase.ejecutar(Long.valueOf(solicitud.solicitudId())))
+                .map(mapper::toResponse)
+                .flatMap(response ->{
+                    log.info("Solicitud de calculo de capacidad de endeudamiento con exito");
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(response);
+                })
+                .onErrorResume(ErrorDominio.class, e ->{
+                    log.error("Error en el servicio calcular capacidad de endeudamiento : {}", e.getMessage());
+                    Map<String, Object> errorMap = Map.of(
+                            "status", HttpStatus.BAD_REQUEST.value(),
+                            "message", e.getMessage(),
+                            "errors", e.getClass().getSimpleName()
+                    );
+                    return ServerResponse.status(HttpStatus.BAD_REQUEST)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(errorMap);
+                });
     }
 
 }

@@ -1,5 +1,6 @@
 package co.com.pragma.usecase.procesarcalculocapacidadendeudamiento;
 
+import co.com.pragma.errores.ErrorValidacion;
 import co.com.pragma.model.mensaje.gateways.MensajeUtilsGateway;
 import co.com.pragma.model.solicitud.EstadoSolicitud;
 import co.com.pragma.model.solicitud.MensajeProcesadoSolicitud;
