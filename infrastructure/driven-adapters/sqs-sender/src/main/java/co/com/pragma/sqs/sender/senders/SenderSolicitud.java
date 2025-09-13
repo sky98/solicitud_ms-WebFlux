@@ -1,5 +1,6 @@
 package co.com.pragma.sqs.sender.senders;
 
+import co.com.pragma.sqs.sender.mapper.MapperMensajesUtils;
 import co.com.pragma.sqs.sender.mensajes.ActualizarEstadoSolicitudMensaje;
 import co.com.pragma.sqs.sender.mensajes.CalcularCapacidadEndeudamientoMensaje;
 import co.com.pragma.errores.ErrorSQS;
@@ -35,17 +36,18 @@ public class SenderSolicitud implements MensajeSQSGateway {
     private final TipoPrestamoRepository tipoPrestamoRepository;
     private final SolicitudRepository solicitudRepository;
     private final UsuarioResConsumerGateway usuarioResConsumerGateway;
-    private final SolicitudMensajeMapper mapper;
+    private final SolicitudMensajeMapper solicitudMensajeMapper;
     private final SQSSender sqsSender;
+    private final MapperMensajesUtils mapperMensajesUtils;
 
     private static String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
     private static String QUEUE_CAPACIDAD_ENDEUDAMIENTO = "/capacidad-endeudamiento";
 
     @Override
     public Mono<Solicitud> enviarSolicitudActualizada(Solicitud modelo) {
-        return Mono.fromCallable(() -> mapper.toMessage(modelo))
+        return Mono.fromCallable(() -> solicitudMensajeMapper.toMessage(modelo))
                 .flatMap(this::transformarEstadoYTipoPrestamo)
-                .flatMap(sqsSender::serializar)
+                .flatMap(mapperMensajesUtils::serializar)
                 .flatMap(msj -> sqsSender.send(msj,QUEUE_ACTUALIZAR_ESTADO_SOLICITUD))
                 .doOnSuccess(token -> log.info("Mensaje enviado con exito : {}", token))
                 .onErrorResume(e -> {
@@ -60,7 +62,7 @@ public class SenderSolicitud implements MensajeSQSGateway {
     @Override
     public Mono<Solicitud> calcularCapacidadEndeudamiento(Solicitud solicitud) {
         return obtenerDatosParaCalculoDeCapacidadDeEndeudamiento(solicitud)
-                .flatMap(sqsSender::serializar)
+                .flatMap(mapperMensajesUtils::serializar)
                 .flatMap(msj -> sqsSender.send(msj, QUEUE_CAPACIDAD_ENDEUDAMIENTO))
                 .doOnSuccess(token -> log.info("Mensaje enviado a la cola para calculo de endeudamiento con exito : {}", token))
                 .onErrorResume(e ->{
@@ -116,6 +118,9 @@ public class SenderSolicitud implements MensajeSQSGateway {
 
     private CalcularCapacidadEndeudamientoMensaje construirMensajeCalcularCapacidadEndeudamiento(Solicitud solicitud, Usuario usuario, TipoPrestamo tipoPrestamo, List<SolicitudLite> solicitudesLite){
         return CalcularCapacidadEndeudamientoMensaje.builder()
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .solicitudId(solicitud.getSolicitudId())
                 .monto(solicitud.getMonto())
                 .plazo(solicitud.getPlazo())
                 .salarioBase(usuario.getSalarioBase())

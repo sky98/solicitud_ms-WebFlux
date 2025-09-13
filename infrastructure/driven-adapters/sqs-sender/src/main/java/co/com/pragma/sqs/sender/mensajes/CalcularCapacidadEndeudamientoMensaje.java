@@ -15,6 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class CalcularCapacidadEndeudamientoMensaje {
+    private String nombres;
+    private String apellidos;
+    private Long solicitudId;
     private BigDecimal monto;
     private Long plazo;
     private BigDecimal salarioBase;
