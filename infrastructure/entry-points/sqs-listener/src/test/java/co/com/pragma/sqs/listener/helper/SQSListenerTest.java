@@ -1,11 +1,14 @@
 package co.com.pragma.sqs.listener.helper;
 
+import co.com.pragma.model.mensaje.gateways.MensajeUtilsGateway;
 import co.com.pragma.sqs.listener.SQSProcessor;
 import co.com.pragma.sqs.listener.config.SQSProperties;
+import co.com.pragma.usecase.procesarcalculocapacidadendeudamiento.ProcesarCalculoCapacidadEndeudamientoUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -28,6 +31,13 @@ class SQSListenerTest {
 
     @Mock
     private SQSProperties sqsProperties;
+
+    @MockitoBean
+    private ProcesarCalculoCapacidadEndeudamientoUseCase useCase;
+
+    @MockitoBean
+    private MensajeUtilsGateway mensajeUtilsGateway;
+
 
     @BeforeEach
     void setUp() {
@@ -53,16 +63,16 @@ class SQSListenerTest {
                 .thenReturn(CompletableFuture.completedFuture(deleteMessageResponse));
     }
 
-    /*@Test
+    @Test
     void listenerTest() {
         var sqsListener = SQSListener.builder()
                 .client(asyncClient)
                 .properties(sqsProperties)
-                .processor(new SQSProcessor())
+                .processor(new SQSProcessor(useCase, mensajeUtilsGateway))
                 .operation("operation")
                 .build();
 
         Flux<Void> flow = ReflectionTestUtils.invokeMethod(sqsListener, "listen");
         StepVerifier.create(flow).verifyComplete();
-    }*/
+    }
 }

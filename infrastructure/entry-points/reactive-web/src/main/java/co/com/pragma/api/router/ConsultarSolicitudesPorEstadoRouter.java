@@ -29,7 +29,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @RequiredArgsConstructor
 public class ConsultarSolicitudesPorEstadoRouter {
 
-    public static final String PATH = "/api/v1/solicitud";
+    public static final String PATH = "/api/v1/solicitudes";
     private final Handler handler;
 
     @Bean

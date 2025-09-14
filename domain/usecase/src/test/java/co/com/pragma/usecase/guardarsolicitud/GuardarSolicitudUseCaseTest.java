@@ -3,6 +3,7 @@ package co.com.pragma.usecase.guardarsolicitud;
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.fabricas.SolicitudFabrica;
 import co.com.pragma.fabricas.TipoPrestamoFabrica;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
@@ -34,6 +35,8 @@ public class GuardarSolicitudUseCaseTest {
     private TipoPrestamoRepository mockTipoPrestamoRepository;
     @Mock
     private UsuarioResConsumerGateway mockUsuarioResConsumerGateway;
+    @Mock
+    private MensajeSQSGateway mockMensajeSQSGateway;
 
     @InjectMocks
     private GuardarSolicitudUseCase useCase;
@@ -48,6 +51,7 @@ public class GuardarSolicitudUseCaseTest {
         when(mockTipoPrestamoRepository.obtenerPorId(anyLong())).thenReturn(Mono.just(tipoPrestamoBuilder));
         when(mockTipoPrestamoRepository.existeMontoEnRango(anyLong(), any(BigDecimal.class))).thenReturn(Mono.just(true));
         when(mockSolicitudRepository.guardar(any(Solicitud.class))).thenReturn(Mono.just(solicitudBuilder));
+        when(mockMensajeSQSGateway.calcularCapacidadEndeudamiento(any(Solicitud.class))).thenReturn(Mono.just(solicitudBuilder));
 
         Mono<Solicitud> resultado = useCase.ejecutar(solicitudBuilder, usuarioAutenticado);
 
@@ -109,7 +113,7 @@ public class GuardarSolicitudUseCaseTest {
         StepVerifier.create(resultado)
                 .expectErrorMatches(throwable ->
                         throwable instanceof ErrorDominio &&
-                                throwable.getMessage().equals("Monto no cumnple con el rango del tipo de prestamo") &&
+                                throwable.getMessage().equals("Monto no cumple con el rango del tipo de prestamo") &&
                                 ((ErrorDominio) throwable).getCampos().equals(Set.of("monto"))
                 )
                 .verify();

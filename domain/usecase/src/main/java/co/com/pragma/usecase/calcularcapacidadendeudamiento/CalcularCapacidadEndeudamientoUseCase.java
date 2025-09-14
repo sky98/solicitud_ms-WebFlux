@@ -18,6 +18,8 @@ public class CalcularCapacidadEndeudamientoUseCase {
     public Mono<Solicitud> ejecutar(Long solicitudId){
         return solicitudRepository.obtenerSolicitudPorId(solicitudId)
                 .switchIfEmpty(Mono.error(new ErrorValidacion("Solicitud no existe en el sistema : "+solicitudId, Set.of("solicitudId:"+solicitudId))))
+                .filter(solicitud -> solicitud.getEstadoId() == 1)
+                .switchIfEmpty(Mono.defer(()-> Mono.error(new ErrorValidacion("La solicitud debe estar pendiente de revision para poder ejecutar este comando", Set.of("solicitudId:"+solicitudId)))))
                 .flatMap(mensajeSQSGateway::calcularCapacidadEndeudamiento);
     }
 

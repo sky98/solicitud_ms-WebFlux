@@ -52,14 +52,14 @@ public class Handler {
                                 .map(mapper::toModel)
                                 .flatMap(solicitud -> guardarSolicitudUseCase.ejecutar(solicitud, autenticado.uid()))
                                 .map(mapper::toResponse)
-                                .flatMap(resp -> {
-                                            log.info("Solicitud registrada con exito : {}", resp);
-                                            return ServerResponse.status(HttpResponseStatus.CREATED.code())
-                                                    .contentType(MediaType.APPLICATION_JSON)
-                                                    .bodyValue(resp);
 
-                                        })
                         )
+                .flatMap(resp -> {
+                    log.info("Solicitud registrada con exito : {}", resp);
+                    return ServerResponse.status(HttpResponseStatus.CREATED.code())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(resp);
+                })
                 .onErrorResume(ErrorDominio.class,e-> {
                     log.error("Error en el servicio registrar solicitud : {}", e.getMessage());
                     Map<String, Object> errorMap = Map.of(
