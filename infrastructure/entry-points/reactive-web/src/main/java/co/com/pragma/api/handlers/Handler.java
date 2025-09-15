@@ -4,11 +4,13 @@ import co.com.pragma.api.dto.UsuarioAutenticado;
 import co.com.pragma.api.dto.request.CrearSolicitudRequestDTO;
 import co.com.pragma.api.mapper.SolicitudMapper;
 import co.com.pragma.api.validador.ValidadorRequest;
+import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.usecase.guardarsolicitud.GuardarSolicitudUseCase;
 import co.com.pragma.usecase.obtenersolicitudesporestado.ObtenerSolicitudesPorEstadoUseCase;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -49,7 +53,17 @@ public class Handler {
 
                                         })
                         )
-                .doOnError(e -> log.error("Error en el servicio registrar solicitud : {}", e.getMessage()));
+                .onErrorResume(ErrorDominio.class,e-> {
+                    log.error("Error en el servicio registrar solicitud : {}", e.getMessage());
+                    Map<String, Object> errorMap = Map.of(
+                            "status", HttpStatus.BAD_REQUEST.value(),
+                            "message", e.getMessage(),
+                            "errors", e.getCampos()
+                    );
+                    return ServerResponse.status(HttpStatus.BAD_REQUEST)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(errorMap);
+                });
 
     }
 

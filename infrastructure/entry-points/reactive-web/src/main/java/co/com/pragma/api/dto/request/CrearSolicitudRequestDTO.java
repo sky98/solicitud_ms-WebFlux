@@ -9,6 +9,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 
+//TODO realizar pruebas por que parece que no esta reaizando las validaciones de los bigDecimal
 @Builder
 public record CrearSolicitudRequestDTO(
         @NotBlank(message = "El campo :documentoId es obligatorio")

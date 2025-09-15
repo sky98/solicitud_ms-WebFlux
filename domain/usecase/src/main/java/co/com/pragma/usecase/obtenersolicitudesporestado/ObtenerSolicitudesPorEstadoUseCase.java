@@ -6,7 +6,7 @@ import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
 import co.com.pragma.model.solicitud.DetallesSolicitudes;
 import co.com.pragma.model.solicitud.Solicitud;
-import co.com.pragma.model.solicitud.SolicitudResponse;
+import co.com.pragma.model.solicitud.SolicitudesProcesadas;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
@@ -91,8 +91,8 @@ public class ObtenerSolicitudesPorEstadoUseCase {
                     Usuario usuario = usuariosMap.get(documentoId);
                     TipoPrestamo tipoPrestamo = tipoPrestamosMap.get(primeraSolicitud.getTipoPrestamoId());
 
-                    List<SolicitudResponse> solicitudesResponse = solicitudesPorUsuario.stream()
-                            .map(solicitud -> SolicitudResponse.builder()
+                    List<SolicitudesProcesadas> solicitudesResponse = solicitudesPorUsuario.stream()
+                            .map(solicitud -> SolicitudesProcesadas.builder()
                                     .solicitudId(solicitud.getSolicitudId())
                                     .monto(solicitud.getMonto())
                                     .plazo(solicitud.getPlazo())

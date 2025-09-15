@@ -20,6 +20,6 @@ public class DetallesSolicitudes {
     private BigDecimal salarioBase;
     private String nombresUsuario;
     private String apellidosUsuario;
-    private List<SolicitudResponse> solicitudes;
+    private List<SolicitudesProcesadas> solicitudes;
     private BigDecimal deudaTotalMensualSolicitudesAprobadas;
 }
