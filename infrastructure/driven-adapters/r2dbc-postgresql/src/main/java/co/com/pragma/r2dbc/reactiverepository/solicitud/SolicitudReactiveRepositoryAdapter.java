@@ -33,6 +33,12 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
 
 
     @Override
+    public Mono<Solicitud> rollback(Solicitud solicitud) {
+        log.info("Realizando Rollback de la operacion anterior.");
+        return guardar(solicitud);
+    }
+
+    @Override
     public Mono<Solicitud> guardar(Solicitud solicitud) {
         return transactionalOperator.execute(
                 status -> super.save(solicitud)
@@ -40,6 +46,15 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
                 .onErrorResume(e -> {
                     log.error(MENSAJE_ERROR + "{}", e.getMessage());
                     return Mono.error(new ErrorPersistencia(MENSAJE_ERROR + e.getMessage(), Set.of(e.getMessage())));
+                });
+    }
+
+    @Override
+    public Mono<Solicitud> obtenerSolicitudPorId(Long solicitudId) {
+        return repository.findBySolicitudId(solicitudId)
+                .onErrorResume(e -> {
+                    log.error("Se genero un error al consultar solicitud con id : {}", solicitudId);
+                    return Mono.error(new ErrorPersistencia("Error al consultar solicitud por id : "+ solicitudId, Set.of(e.getMessage())));
                 });
     }
 
