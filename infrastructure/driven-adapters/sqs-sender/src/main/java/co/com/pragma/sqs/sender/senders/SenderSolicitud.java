@@ -42,6 +42,7 @@ public class SenderSolicitud implements MensajeSQSGateway {
 
     private static String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
     private static String QUEUE_CAPACIDAD_ENDEUDAMIENTO = "/capacidad-endeudamiento";
+    private static String QUEUE_SOLICITUDES_APROBADAS = "/solicitudes-aprobadas";
 
     @Override
     public Mono<Solicitud> enviarSolicitudActualizada(Solicitud modelo) {
@@ -71,6 +72,19 @@ public class SenderSolicitud implements MensajeSQSGateway {
                             new ErrorSQS("Se ha generado un error al enviar mensaje a SQS : " + e.getMessage(), Set.of(e.getMessage()))
                     );
                 }).thenReturn(solicitud);
+    }
+
+    @Override
+    public Mono<Solicitud> enviarSolicitudAprobada(Solicitud solicitud) {
+        return Mono.just(solicitudMensajeMapper.toSolicitudAprobadaMensaje(solicitud))
+                .flatMap(mapperMensajesUtils::serializar)
+                .flatMap(msj -> sqsSender.send(msj, QUEUE_SOLICITUDES_APROBADAS))
+                .doOnSuccess(token -> log.info("Mensaje enviado a la cola {}, con exito ", QUEUE_SOLICITUDES_APROBADAS))
+                .onErrorResume(e ->{
+                    log.error("Se ha generado un error al enviar mensaje a SQS : {}, error : {}", QUEUE_SOLICITUDES_APROBADAS, e.getMessage());
+                    return Mono.defer(() ->Mono.error(new ErrorSQS("Se ha generado un error al enviar mensaje a SQS : " + e.getMessage(), Set.of(e.getMessage()))));
+                })
+                .map(resp -> solicitud);
     }
 
     private Mono<ActualizarEstadoSolicitudMensaje> transformarEstadoYTipoPrestamo(ActualizarEstadoSolicitudMensaje msj){
