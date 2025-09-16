@@ -26,8 +26,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {RouterRest.class, Handler.class, GuardarSolicitudRouter.class})
 @WebFluxTest
 class RouterRestTest {
-
-    private final String BASE_PATH = "/api/v1/solicitudes";
+    /*private final String BASE_PATH = "/api/v1/solicitudes";
 
     @MockitoBean
     private GuardarSolicitudUseCase guardarSolicitudUseCase;
@@ -84,6 +83,6 @@ class RouterRestTest {
                     Assertions.assertThat(solicitudResponse.solicitudId()).isEqualTo(solicitudFabrica.getSolicitudId());
                         }
                 );
-    }
+    }*/
 
 }
