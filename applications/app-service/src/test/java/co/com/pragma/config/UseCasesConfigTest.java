@@ -1,5 +1,8 @@
 package co.com.pragma.config;
 
+import co.com.pragma.model.estado.gateways.EstadoRepository;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.MensajeUtilsGateway;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.gateways.TipoPrestamoRepository;
@@ -50,9 +53,18 @@ public class UseCasesConfigTest {
         }
 
         @Bean
+        public EstadoRepository estadoRepository(){ return Mockito.mock(EstadoRepository.class); }
+
+        @Bean
         public UsuarioResConsumerGateway resConsumerGateway(){
             return Mockito.mock(UsuarioResConsumerGateway.class);
         }
+
+        @Bean
+        public MensajeSQSGateway mensajeSQSGateway() { return Mockito.mock(MensajeSQSGateway.class); }
+
+        @Bean
+        public MensajeUtilsGateway mensajeUtilsGateway() { return Mockito.mock(MensajeUtilsGateway.class); }
     }
 
     static class MyUseCase {

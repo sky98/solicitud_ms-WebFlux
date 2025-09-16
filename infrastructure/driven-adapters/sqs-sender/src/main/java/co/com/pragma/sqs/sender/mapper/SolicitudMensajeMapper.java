@@ -1,11 +1,11 @@
 package co.com.pragma.sqs.sender.mapper;
 
-import co.com.pragma.consecuencias.ActualizarEstadoSolicitudMensaje;
+import co.com.pragma.sqs.sender.mensajes.ActualizarEstadoSolicitudMensaje;
 import co.com.pragma.model.solicitud.Solicitud;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActualizarEstadoSolicitudMensajeMapper {
+public class SolicitudMensajeMapper {
 
     public ActualizarEstadoSolicitudMensaje toMessage(Solicitud solicitud){
         return ActualizarEstadoSolicitudMensaje.builder()

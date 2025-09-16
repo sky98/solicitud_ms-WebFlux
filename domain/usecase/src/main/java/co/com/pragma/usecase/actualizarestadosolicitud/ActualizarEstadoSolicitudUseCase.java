@@ -2,7 +2,7 @@ package co.com.pragma.usecase.actualizarestadosolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeRepository;
+import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class ActualizarEstadoSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final EstadoRepository estadoRepository;
-    private final MensajeRepository mensajeRepository;
+    private final MensajeSQSGateway mensajeSQSGateway;
 
     public Mono<Solicitud> ejecutar(Solicitud solicitud){
         return solicitudRepository.obtenerSolicitudPorId(solicitud.getSolicitudId())
@@ -30,7 +30,7 @@ public class ActualizarEstadoSolicitudUseCase {
                         .flatMap(estado -> {
                             solicitudEncontrada.setEstadoId(estado.getEstadoId());
                             return solicitudRepository.guardar(solicitudEncontrada)
-                                    .flatMap(solicitudGuardada -> mensajeRepository.enviarSolicitudActualizada(solicitudGuardada)
+                                    .flatMap(solicitudGuardada -> mensajeSQSGateway.enviarSolicitudActualizada(solicitudGuardada)
                                             .onErrorResume(e -> solicitudRepository.rollback(solicitudEncontrada))
                                             .thenReturn(solicitudGuardada)
                                     );

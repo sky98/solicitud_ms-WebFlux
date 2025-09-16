@@ -18,4 +18,6 @@ public interface SolicitudReactiveRepository extends ReactiveCrudRepository<Soli
 
     Mono<Solicitud> findBySolicitudId(Long solicitudId);
 
+    @Query("SELECT * FROM solicitudes WHERE documento_id = :documentoId AND estado_id = :estadoId")
+    Flux<Solicitud> findByDocumentoIdAndEstadoId(Long documentoId, Long estadoId);
 }

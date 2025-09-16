@@ -65,3 +65,11 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+entrypoint:
+  sqs:
+    region: "${AWS_REGION}"
+    queueUrl: "${LISTENER_SQS_CAPACIDAD_ENDEUDAMIENTO}"
+    waitTimeSeconds: 10
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1

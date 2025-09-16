@@ -69,6 +69,15 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
     }
 
     @Override
+    public Flux<Solicitud> obtenerSolicitudesPorDocumentoIdAprobadas(Long documentoId) {
+        return repository.findByDocumentoIdAndEstadoId(documentoId, 4L)
+                .onErrorResume(e -> {
+                    log.error("Se genero un error al consultar solicitudes aprobadas para el usuario con documentoId : {}", documentoId);
+                    return Mono.error(new ErrorPersistencia("Error al consultar solicitudes aprobadas por documentoId", Set.of(e.getMessage())));
+                });
+    }
+
+    @Override
     public Mono<Long> contarSolicitudesPorEstado(Integer estadoId) {
         return repository.contarSolicitudesPorEstado(estadoId)
                 .doOnNext(solicitudes -> log.info("Se consulto con exito el numero total de las solicitudes con estadoId : {}", estadoId))

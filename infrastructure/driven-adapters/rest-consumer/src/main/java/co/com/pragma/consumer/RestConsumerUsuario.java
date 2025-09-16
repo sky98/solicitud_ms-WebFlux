@@ -1,5 +1,6 @@
 package co.com.pragma.consumer;
 
+import co.com.pragma.consumer.circuitbreaker.CircuitBreakerFallbacks;
 import co.com.pragma.consumer.response.ValidarUsuarioPorIdResponse;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.usuario.Usuario;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class RestConsumerUsuario implements UsuarioResConsumerGateway {
 
     private final WebClient client;
+    private final CircuitBreakerFallbacks fallbacks;
     private final String PATH_VALIDAR_USUARIO_POR_DOCUMENTO_ID = "/api/v1/usuarios/documento/{documentoId}/existe";
     private final String PATH_OBTENER_USUARIO_POR_DOCUMENTO_ID = "/api/v1/usuarios/documento/{documentoId}";
 
@@ -46,12 +48,10 @@ public class RestConsumerUsuario implements UsuarioResConsumerGateway {
     }
 
     private Mono<Boolean> validarUsuarioFallback(Long documentoId, Throwable throwable) {
-        log.error("Se activa el fallback para la peticion de validar usuario por documentoId: {}. Causa: {}", documentoId, throwable.getMessage());
-        return Mono.just(false);
+        return fallbacks.validarUsuarioFallback(documentoId, throwable);
     }
 
     private Mono<Usuario> obtenerUsuarioFallback(Long documentoId, Throwable throwable) {
-        log.error("Se activa el fallback para la peticion de obtener usuario por documentoId: {}. Causa: {}", documentoId, throwable.getMessage());
-        return Mono.empty();
+        return fallbacks.obtenerUsuarioFallback(documentoId, throwable);
     }
 }
