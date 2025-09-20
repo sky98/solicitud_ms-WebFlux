@@ -1,5 +1,5 @@
 server:
-  port: "${SOL_PORT}"
+  port: ${SOL_PORT}
 spring:
   application:
     name: "solicitudes"
@@ -13,9 +13,9 @@ spring:
     include: null
 adapters:
   r2dbc:
-    host: "${SOL_DB_HOST}"
-    port: "${DB_PORT}"
-    database: "${SOL_DB_NAME}"
+    host: "${DB_HOST}"
+    port: ${DB_PORT}
+    database: ${DB_NAME}
     schema: "public"
     username: "${DB_USER}"
     password: "${DB_PASSWORD}"
@@ -40,7 +40,7 @@ cors:
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://autenticacion:${AUTH_PORT}"
+    url: "${AUTH_SERVICE}"
   sqs:
     region: "${AWS_REGION}"
     queueUrl: "${SQS_QUEUE_URL}"
