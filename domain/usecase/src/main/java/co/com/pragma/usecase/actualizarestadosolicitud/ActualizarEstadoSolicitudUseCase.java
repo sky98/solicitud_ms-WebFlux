@@ -1,8 +1,10 @@
 package co.com.pragma.usecase.actualizarestadosolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
+import co.com.pragma.errores.ErrorSQS;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
 import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.solicitud.EstadoSolicitud;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,10 @@ public class ActualizarEstadoSolicitudUseCase {
                             return solicitudRepository.guardar(solicitudEncontrada)
                                     .flatMap(solicitudGuardada -> mensajeSQSGateway.enviarSolicitudActualizada(solicitudGuardada)
                                             .onErrorResume(e -> solicitudRepository.rollback(solicitudEncontrada))
+                                            .flatMap(solicitudEnviada -> ESTADO_APROBADO.equals(estado.getNombre())
+                                                        ? mensajeSQSGateway.enviarSolicitudAprobada(solicitudEnviada)
+                                                        : Mono.just(solicitud)
+                                            )
                                             .thenReturn(solicitudGuardada)
                                     );
                         })

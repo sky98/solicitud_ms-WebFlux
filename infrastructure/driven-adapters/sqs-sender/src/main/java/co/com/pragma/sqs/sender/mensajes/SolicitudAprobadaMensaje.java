@@ -1,0 +1,19 @@
+package co.com.pragma.sqs.sender.mensajes;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
+public class SolicitudAprobadaMensaje {
+    private Long solicitudId;
+    private BigDecimal monto;
+}

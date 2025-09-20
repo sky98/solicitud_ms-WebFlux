@@ -2,6 +2,7 @@ package co.com.pragma.sqs.sender.mapper;
 
 import co.com.pragma.sqs.sender.mensajes.ActualizarEstadoSolicitudMensaje;
 import co.com.pragma.model.solicitud.Solicitud;
+import co.com.pragma.sqs.sender.mensajes.SolicitudAprobadaMensaje;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,6 +16,13 @@ public class SolicitudMensajeMapper {
                 .documentoId(solicitud.getDocumentoId())
                 .tipoPrestamo(String.valueOf(solicitud.getTipoPrestamoId()))
                 .estado(String.valueOf(solicitud.getEstadoId()))
+                .build();
+    }
+
+    public SolicitudAprobadaMensaje toSolicitudAprobadaMensaje(Solicitud solicitud){
+        return SolicitudAprobadaMensaje.builder()
+                .solicitudId(solicitud.getSolicitudId())
+                .monto(solicitud.getMonto())
                 .build();
     }
 

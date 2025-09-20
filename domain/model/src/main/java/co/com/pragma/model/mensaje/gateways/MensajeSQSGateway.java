@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface MensajeSQSGateway {
     Mono<Solicitud> enviarSolicitudActualizada(Solicitud solicitud);
     Mono<Solicitud> calcularCapacidadEndeudamiento(Solicitud solicitud);
+    Mono<Solicitud> enviarSolicitudAprobada(Solicitud solicitud);
 }
