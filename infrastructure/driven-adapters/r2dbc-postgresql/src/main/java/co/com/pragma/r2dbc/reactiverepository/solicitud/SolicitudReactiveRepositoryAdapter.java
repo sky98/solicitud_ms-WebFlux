@@ -12,6 +12,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Slf4j
@@ -65,6 +66,15 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
                 .onErrorResume(e -> {
                     log.error("Se genero un error al consultar solicitudes con estadoId : {}", estadoId);
                     return Mono.error(new ErrorPersistencia("Error al consultar solicitudes por estado", Set.of(e.getMessage())));
+                });
+    }
+
+    @Override
+    public Flux<Solicitud> obtenerSolicitudesAprobadaPorFecha(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        return repository.findByEstadoIdAndFechaAprobacionBetween(4L, fechaInicio, fechaFin)
+                .onErrorResume(e-> {
+                    log.error("Se genero un error al consultar solicitudes aprobadas entre las fechas : {} y {}", fechaInicio, fechaFin);
+                    return Mono.error(new ErrorPersistencia("Error al consultar solicitudes aprobadas por fecha", Set.of(e.getMessage())));
                 });
     }
 

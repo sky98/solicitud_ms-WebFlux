@@ -10,6 +10,7 @@ import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.usecase.actualizarestadosolicitud.ActualizarEstadoSolicitudUseCase;
 import co.com.pragma.usecase.calcularcapacidadendeudamiento.CalcularCapacidadEndeudamientoUseCase;
 import co.com.pragma.usecase.guardarsolicitud.GuardarSolicitudUseCase;
+import co.com.pragma.usecase.obtenersolicitudesaprobadasporfecha.ObtenerSolicitudesAprobadasPorFechaUseCase;
 import co.com.pragma.usecase.obtenersolicitudesporestado.ObtenerSolicitudesPorEstadoUseCase;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,10 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Slf4j
@@ -34,6 +39,7 @@ public class Handler {
     private final ObtenerSolicitudesPorEstadoUseCase obtenerSolicitudesPorEstadoUseCase;
     private final ActualizarEstadoSolicitudUseCase actualizarEstadoSolicitudUseCase;
     private final CalcularCapacidadEndeudamientoUseCase calcularCapacidadEndeudamientoUseCase;
+    private final ObtenerSolicitudesAprobadasPorFechaUseCase obtenerSolicitudesAprobadasPorFechaUseCase;
 
     private final ValidadorRequest validadorRequest;
     private final SolicitudMapper mapper;
@@ -103,7 +109,7 @@ public class Handler {
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(response);
                 })
-                .onErrorResume(ErrorDominio.class,e-> {
+                .onErrorResume( e-> {
                     log.error("Error en el servicio actualizar estado solicitud : {}", e.getMessage());
                     Map<String, Object> errorMap = Map.of(
                             "status", HttpStatus.BAD_REQUEST.value(),
@@ -142,6 +148,26 @@ public class Handler {
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(errorMap);
                 });
+    }
+
+    @PreAuthorize("hasRole('1')")
+    public Mono<ServerResponse> obtenerSolicitudesAprobadasPorFecha(ServerRequest serverRequest){
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        LocalDate fechaInicio = serverRequest.queryParam("fechaInicio")
+                .map(f -> LocalDate.parse(f, formatter))
+                .orElse(LocalDate.now());
+        LocalDate fechaFin = serverRequest.queryParam("fechaFin")
+                .map(f -> LocalDate.parse(f, formatter))
+                .orElse(LocalDate.now());
+        LocalDateTime inicioDelDia = fechaInicio.atStartOfDay();
+        LocalDateTime finDelDia = fechaFin.atTime(LocalTime.MAX);
+        return  obtenerSolicitudesAprobadasPorFechaUseCase.ejecutar(inicioDelDia, finDelDia)
+                .flatMap(solicitudes -> solicitudes.isEmpty()
+                        ? ServerResponse.notFound().build()
+                        : ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(solicitudes))
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
 
 }

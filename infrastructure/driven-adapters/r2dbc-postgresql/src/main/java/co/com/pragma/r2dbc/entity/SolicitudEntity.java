@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,4 +30,6 @@ public class SolicitudEntity {
     private String tipoPrestamoId;
     @Column("documento_id")
     private Long documentoId;
+    @Column("fecha_aprobacion")
+    private LocalDateTime fechaAprobacion;
 }

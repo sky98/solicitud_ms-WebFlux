@@ -9,6 +9,10 @@ import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 @RequiredArgsConstructor
 public class ProcesarCalculoCapacidadEndeudamientoUseCase {
 
@@ -22,12 +26,27 @@ public class ProcesarCalculoCapacidadEndeudamientoUseCase {
                         solicitudRepository.obtenerSolicitudPorId((long) mensaje.getSolicitudId())
                                 .flatMap(solicitud -> {
                                     solicitud.setEstadoId(EstadoSolicitud.getIdByNombre(mensaje.getEstado()));
-                                    return solicitudRepository.guardar(solicitud)
-                                            .flatMap(solicitudGuardada -> EstadoSolicitud.APROBADO.getId().equals(solicitudGuardada.getEstadoId())
+                                    solicitud.setFechaAprobacion(LocalDateTime.now());
+                                    return validarEstado(solicitud, mensaje)
+                                            .flatMap(solicitudRepository::guardar)
+                                            .flatMap(solicitudGuardada -> EstadoSolicitud.APROBADA.getId().equals(solicitudGuardada.getEstadoId())
                                                     ? mensajeSQSGateway.enviarSolicitudAprobada(solicitudGuardada)
                                                     : Mono.just(solicitudGuardada));
                                 })
                 );
+    }
+
+    private Mono<Solicitud> validarEstado(Solicitud solicitud, MensajeProcesadoSolicitud mensaje) {
+        return Mono.just(solicitud)
+                .map(s -> {
+                    s.setEstadoId(EstadoSolicitud.getIdByNombre(mensaje.getEstado()));
+                    s.setFechaAprobacion(
+                            EstadoSolicitud.APROBADA.getId().equals(s.getEstadoId())
+                                    ? ZonedDateTime.now(ZoneId.of("America/Bogota")).toLocalDateTime()
+                                    : s.getFechaAprobacion()
+                    );
+                    return s;
+                });
     }
 
 }

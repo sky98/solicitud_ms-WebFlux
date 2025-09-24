@@ -5,6 +5,7 @@ import co.com.pragma.api.router.ActualizarEstadoSolicitudRouter;
 import co.com.pragma.api.router.CalcularCapacidadEndeudamientoRouter;
 import co.com.pragma.api.router.ConsultarSolicitudesPorEstadoRouter;
 import co.com.pragma.api.router.GuardarSolicitudRouter;
+import co.com.pragma.api.router.ObtenerSolicitudesAprobadasPorFechaRouter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ public class RouterRest {
     private final ConsultarSolicitudesPorEstadoRouter consultarSolicitudesPorEstadoRouter;
     private final ActualizarEstadoSolicitudRouter actualizarEstadoSolicitudRouter;
     private final CalcularCapacidadEndeudamientoRouter calcularCapacidadEndeudamientoRouter;
+    private final ObtenerSolicitudesAprobadasPorFechaRouter obtenerSolicitudesAprobadasPorFechaRouter;
 
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
@@ -28,6 +30,7 @@ public class RouterRest {
                 .add(consultarSolicitudesPorEstadoRouter.consultarSolicitudesPorEstadoRouterFunction())
                 .add(actualizarEstadoSolicitudRouter.actualizarEstadoSolicitudRouterFunction())
                 .add(calcularCapacidadEndeudamientoRouter.calcularCapacidadEndeudamientoRouterFunction())
+                .add(obtenerSolicitudesAprobadasPorFechaRouter.obtenerSolicitudesAprobadasPorFechaRouterFunction())
                 .build();
     }
 }
