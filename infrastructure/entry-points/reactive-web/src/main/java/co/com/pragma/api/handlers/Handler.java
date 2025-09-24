@@ -150,7 +150,6 @@ public class Handler {
                 });
     }
 
-    @PreAuthorize("hasRole('1')")
     public Mono<ServerResponse> obtenerSolicitudesAprobadasPorFecha(ServerRequest serverRequest){
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate fechaInicio = serverRequest.queryParam("fechaInicio")
@@ -161,12 +160,14 @@ public class Handler {
                 .orElse(LocalDate.now());
         LocalDateTime inicioDelDia = fechaInicio.atStartOfDay();
         LocalDateTime finDelDia = fechaFin.atTime(LocalTime.MAX);
+        log.info("Consultando solicitudes aprobadas entre las fechas : {} y {}", inicioDelDia, finDelDia);
         return  obtenerSolicitudesAprobadasPorFechaUseCase.ejecutar(inicioDelDia, finDelDia)
                 .flatMap(solicitudes -> solicitudes.isEmpty()
                         ? ServerResponse.notFound().build()
                         : ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(solicitudes))
+                .doOnNext(resp -> log.info("Extraccion de solicitudes aprobadas entre las fechas : {} y {} realizada con exito", inicioDelDia, finDelDia))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
