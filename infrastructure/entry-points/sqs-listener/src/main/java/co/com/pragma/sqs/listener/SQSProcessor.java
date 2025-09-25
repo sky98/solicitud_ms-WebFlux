@@ -15,13 +15,13 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class SQSProcessor implements Function<Message, Mono<Void>> {
 
-    private final ProcesarCalculoCapacidadEndeudamientoUseCase calculoCapacidadEndeudamientoUseCase;
+    private final ProcesarCalculoCapacidadEndeudamientoUseCase procesarCalculoCapacidadEndeudamientoUseCase;
     private final MensajeUtilsGateway mensajeUtilsGateway;
 
     @Override
     public Mono<Void> apply(Message message) {
         log.info("Procesando mensaje : {}", message.body());
-        return calculoCapacidadEndeudamientoUseCase.ejecutar(message.body())
+        return procesarCalculoCapacidadEndeudamientoUseCase.ejecutar(message.body())
                 .flatMap(mensajeUtilsGateway::serializar)
                 .flatMap(resp -> {
                     log.info("Mensaje procesado con exito : {}", resp);

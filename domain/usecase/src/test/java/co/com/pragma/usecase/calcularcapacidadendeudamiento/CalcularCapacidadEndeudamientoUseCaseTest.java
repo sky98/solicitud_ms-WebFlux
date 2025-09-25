@@ -2,7 +2,7 @@ package co.com.pragma.usecase.calcularcapacidadendeudamiento;
 
 import co.com.pragma.errores.ErrorValidacion;
 import co.com.pragma.fabricas.SolicitudFabrica;
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class CalcularCapacidadEndeudamientoUseCaseTest {
     private SolicitudRepository mockSolicitudRepository;
 
     @Mock
-    private MensajeSQSGateway mockMensajeSQSGateway;
+    private EncolarMensajeGateway mockEncolarMensajeGateway;
 
     @InjectMocks
     private CalcularCapacidadEndeudamientoUseCase useCase;
@@ -65,13 +65,13 @@ public class CalcularCapacidadEndeudamientoUseCaseTest {
                 )
                 .verify();
 
-        verify(mockMensajeSQSGateway, never()).calcularCapacidadEndeudamiento(any(Solicitud.class));
+        verify(mockEncolarMensajeGateway, never()).calcularCapacidadEndeudamiento(any(Solicitud.class));
     }
 
     @Test
     void testEjecutar_TodoCorrecto_DebeLlamarAlGateway() {
         when(mockSolicitudRepository.obtenerSolicitudPorId(anyLong())).thenReturn(Mono.just(solicitudValida));
-        when(mockMensajeSQSGateway.calcularCapacidadEndeudamiento(any(Solicitud.class))).thenReturn(Mono.just(solicitudValida));
+        when(mockEncolarMensajeGateway.calcularCapacidadEndeudamiento(any(Solicitud.class))).thenReturn(Mono.just(solicitudValida));
 
         Mono<Solicitud> resultado = useCase.ejecutar(solicitudValida.getSolicitudId());
 
@@ -79,7 +79,7 @@ public class CalcularCapacidadEndeudamientoUseCaseTest {
                 .expectNext(solicitudValida)
                 .verifyComplete();
 
-        verify(mockMensajeSQSGateway).calcularCapacidadEndeudamiento(solicitudValida);
+        verify(mockEncolarMensajeGateway).calcularCapacidadEndeudamiento(solicitudValida);
     }
 
 }

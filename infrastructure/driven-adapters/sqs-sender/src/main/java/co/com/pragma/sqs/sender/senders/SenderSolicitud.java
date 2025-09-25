@@ -6,7 +6,7 @@ import co.com.pragma.sqs.sender.mensajes.CalcularCapacidadEndeudamientoMensaje;
 import co.com.pragma.errores.ErrorSQS;
 import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SenderSolicitud implements MensajeSQSGateway {
+public class SenderSolicitud implements EncolarMensajeGateway {
 
     private final EstadoRepository estadoRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
@@ -40,9 +40,9 @@ public class SenderSolicitud implements MensajeSQSGateway {
     private final SQSSender sqsSender;
     private final MapperMensajesUtils mapperMensajesUtils;
 
-    private static String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
-    private static String QUEUE_CAPACIDAD_ENDEUDAMIENTO = "/capacidad-endeudamiento";
-    private static String QUEUE_SOLICITUDES_APROBADAS = "/solicitudes-aprobadas";
+    private final String QUEUE_ACTUALIZAR_ESTADO_SOLICITUD = "/solicitudes";
+    private final String QUEUE_CAPACIDAD_ENDEUDAMIENTO = "/capacidad-endeudamiento";
+    private final String QUEUE_SOLICITUDES_APROBADAS = "/solicitudes-aprobadas";
 
     @Override
     public Mono<Solicitud> enviarSolicitudActualizada(Solicitud modelo) {

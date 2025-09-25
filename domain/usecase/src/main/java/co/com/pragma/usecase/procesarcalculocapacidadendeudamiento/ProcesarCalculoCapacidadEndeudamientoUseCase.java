@@ -1,6 +1,6 @@
 package co.com.pragma.usecase.procesarcalculocapacidadendeudamiento;
 
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.mensaje.gateways.MensajeUtilsGateway;
 import co.com.pragma.model.solicitud.EstadoSolicitud;
 import co.com.pragma.model.solicitud.MensajeProcesadoSolicitud;
@@ -18,7 +18,7 @@ public class ProcesarCalculoCapacidadEndeudamientoUseCase {
 
     private final MensajeUtilsGateway mensajeUtilsGateway;
     private final SolicitudRepository solicitudRepository;
-    private final MensajeSQSGateway mensajeSQSGateway;
+    private final EncolarMensajeGateway encolarMensajeGateway;
 
     public Mono<Solicitud> ejecutar(String messageBody){
         return mensajeUtilsGateway.deserializarMensaje(messageBody, MensajeProcesadoSolicitud.class)
@@ -30,7 +30,7 @@ public class ProcesarCalculoCapacidadEndeudamientoUseCase {
                                     return validarEstado(solicitud, mensaje)
                                             .flatMap(solicitudRepository::guardar)
                                             .flatMap(solicitudGuardada -> EstadoSolicitud.APROBADA.getId().equals(solicitudGuardada.getEstadoId())
-                                                    ? mensajeSQSGateway.enviarSolicitudAprobada(solicitudGuardada)
+                                                    ? encolarMensajeGateway.enviarSolicitudAprobada(solicitudGuardada)
                                                     : Mono.just(solicitudGuardada));
                                 })
                 );

@@ -3,7 +3,7 @@ package co.com.pragma.usecase.actualizarestadosolicitud;
 import co.com.pragma.errores.ErrorDominio;
 import co.com.pragma.model.estado.Estado;
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.solicitud.EstadoSolicitud;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
@@ -22,7 +22,7 @@ public class ActualizarEstadoSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final EstadoRepository estadoRepository;
-    private final MensajeSQSGateway mensajeSQSGateway;
+    private final EncolarMensajeGateway encolarMensajeGateway;
 
     public Mono<Solicitud> ejecutar(Solicitud solicitud){
         return solicitudRepository.obtenerSolicitudPorId(solicitud.getSolicitudId())
@@ -33,10 +33,10 @@ public class ActualizarEstadoSolicitudUseCase {
                         .switchIfEmpty(Mono.error(new ErrorDominio("Estado a actualizar no es valido (Aprobada, Rechazada)", Set.of("estadoId:"+solicitud.getEstadoId()))))
                         .flatMap(estado -> validarEstado(solicitudEncontrada, estado)
                                 .flatMap(solicitudRepository::guardar)
-                                .flatMap(solicitudGuardada -> mensajeSQSGateway.enviarSolicitudActualizada(solicitudGuardada)
+                                .flatMap(solicitudGuardada -> encolarMensajeGateway.enviarSolicitudActualizada(solicitudGuardada)
                                         .onErrorResume(e -> solicitudRepository.rollback(solicitudEncontrada))
                                         .flatMap(solicitudEnviada -> ESTADO_APROBADO.equals(estado.getNombre())
-                                                    ? mensajeSQSGateway.enviarSolicitudAprobada(solicitudEnviada)
+                                                    ? encolarMensajeGateway.enviarSolicitudAprobada(solicitudEnviada)
                                                     : Mono.just(solicitud)
                                         )
                                         .thenReturn(solicitudGuardada)

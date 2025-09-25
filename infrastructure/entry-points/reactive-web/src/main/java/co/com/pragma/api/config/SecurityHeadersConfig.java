@@ -23,6 +23,7 @@ public class SecurityHeadersConfig /*implements WebFilter*/ {
     private final String PATH_API_DOCS = "/v3/api-docs/**";
     private final String PATH_SOLICITUDES_APROBADAS_POR_FECHA = "/api/v1/solicitudes/aprobadas/fecha";
     private final String PATH_ACTUATOR_HEALTH = "/actuator/health";
+    private final String PATH_STATUS = "/status";
 
     private final RequestTokenFilter requestTokenFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -36,6 +37,7 @@ public class SecurityHeadersConfig /*implements WebFilter*/ {
                 .authenticationManager(jwtAuthenticateManager)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
+                                PATH_STATUS,
                                 PATH_SWAGGER,
                                 PATH_API_DOCS,
                                 PATH_ACTUATOR_HEALTH,

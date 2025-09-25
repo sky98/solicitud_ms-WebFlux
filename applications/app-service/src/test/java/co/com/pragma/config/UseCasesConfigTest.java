@@ -1,7 +1,7 @@
 package co.com.pragma.config;
 
 import co.com.pragma.model.estado.gateways.EstadoRepository;
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.mensaje.gateways.MensajeUtilsGateway;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
 import co.com.pragma.model.solicitud.gateways.SolicitudRepository;
@@ -61,7 +61,7 @@ public class UseCasesConfigTest {
         }
 
         @Bean
-        public MensajeSQSGateway mensajeSQSGateway() { return Mockito.mock(MensajeSQSGateway.class); }
+        public EncolarMensajeGateway mensajeSQSGateway() { return Mockito.mock(EncolarMensajeGateway.class); }
 
         @Bean
         public MensajeUtilsGateway mensajeUtilsGateway() { return Mockito.mock(MensajeUtilsGateway.class); }

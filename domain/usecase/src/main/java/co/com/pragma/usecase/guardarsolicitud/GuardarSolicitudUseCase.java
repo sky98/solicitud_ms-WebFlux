@@ -1,7 +1,7 @@
 package co.com.pragma.usecase.guardarsolicitud;
 
 import co.com.pragma.errores.ErrorDominio;
-import co.com.pragma.model.mensaje.gateways.MensajeSQSGateway;
+import co.com.pragma.model.mensaje.gateways.EncolarMensajeGateway;
 import co.com.pragma.model.solicitud.Solicitud;
 import co.com.pragma.model.tipoprestamo.TipoPrestamo;
 import co.com.pragma.model.usuario.gateways.UsuarioResConsumerGateway;
@@ -18,7 +18,7 @@ public class GuardarSolicitudUseCase {
     private final SolicitudRepository solicitudRepository;
     private final TipoPrestamoRepository tipoPrestamoRepository;
     private final UsuarioResConsumerGateway usuarioResConsumerGateway;
-    private final MensajeSQSGateway mensajeSQSGateway;
+    private final EncolarMensajeGateway encolarMensajeGateway;
 
     public Mono<Solicitud> ejecutar(Solicitud solicitud, String usuarioAutenticado){
         return Mono.defer(() -> {
@@ -56,7 +56,7 @@ public class GuardarSolicitudUseCase {
                 )
                 .flatMap(solicitudGuardada ->
                         tipoPrestamo.getValidacionAutomatica().equals("SI")
-                                ? mensajeSQSGateway.calcularCapacidadEndeudamiento(solicitudGuardada)
+                                ? encolarMensajeGateway.calcularCapacidadEndeudamiento(solicitudGuardada)
                                 : Mono.just(solicitudGuardada)
                         );
     }

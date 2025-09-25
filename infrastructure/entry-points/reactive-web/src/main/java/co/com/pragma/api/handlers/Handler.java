@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -43,6 +42,13 @@ public class Handler {
 
     private final ValidadorRequest validadorRequest;
     private final SolicitudMapper mapper;
+
+    public Mono<ServerResponse> checkHealth(ServerRequest serverRequest){
+        log.info("Iniciando flujo de health check");
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"status\": \"UP\"}");
+    }
 
     @PreAuthorize("hasRole('3')")
     public Mono<ServerResponse> guardarSolicitud(ServerRequest serverRequest) {

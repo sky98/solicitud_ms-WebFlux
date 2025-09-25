@@ -9,6 +9,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,12 +21,13 @@ import java.util.Set;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtUtilsAdapter {
 
     @Value("${jwt.secret}")
-    private String jwtSecret;
+    private final String jwtSecret;
     @Value("${jwt.expiration.millis}")
-    private Long jwtExpirationMillis;
+    private final Long jwtExpirationMillis;
 
     public SecretKey jwtSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
