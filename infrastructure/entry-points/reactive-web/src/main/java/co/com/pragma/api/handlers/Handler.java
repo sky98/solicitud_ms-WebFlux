@@ -159,7 +159,7 @@ public class Handler {
                 .map(f -> LocalDate.parse(f, formatter))
                 .orElse(LocalDate.now());
         LocalDateTime inicioDelDia = fechaInicio.atStartOfDay();
-        LocalDateTime finDelDia = fechaFin.atTime(LocalTime.MAX);
+        LocalDateTime finDelDia = fechaFin.atTime(23, 59, 59);
         log.info("Consultando solicitudes aprobadas entre las fechas : {} y {}", inicioDelDia, finDelDia);
         return  obtenerSolicitudesAprobadasPorFechaUseCase.ejecutar(inicioDelDia, finDelDia)
                 .flatMap(solicitudes -> solicitudes.isEmpty()

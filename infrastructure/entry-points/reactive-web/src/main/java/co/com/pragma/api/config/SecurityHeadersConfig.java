@@ -21,7 +21,8 @@ public class SecurityHeadersConfig /*implements WebFilter*/ {
 
     private final String PATH_SWAGGER = "/swagger-ui/**";
     private final String PATH_API_DOCS = "/v3/api-docs/**";
-    public static final String PATH_SOLICITUDES_APROBADAS_POR_FECHA = "/api/v1/solicitudes/aprobadas/fecha";
+    private final String PATH_SOLICITUDES_APROBADAS_POR_FECHA = "/api/v1/solicitudes/aprobadas/fecha";
+    private final String PATH_ACTUATOR_HEALTH = "/actuator/health";
 
     private final RequestTokenFilter requestTokenFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -37,6 +38,7 @@ public class SecurityHeadersConfig /*implements WebFilter*/ {
                         .pathMatchers(
                                 PATH_SWAGGER,
                                 PATH_API_DOCS,
+                                PATH_ACTUATOR_HEALTH,
                                 PATH_SOLICITUDES_APROBADAS_POR_FECHA
                         ).permitAll()
                         .anyExchange().authenticated()
