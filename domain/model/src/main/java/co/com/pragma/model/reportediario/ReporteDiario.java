@@ -20,5 +20,5 @@ public class ReporteDiario {
     private BigDecimal salarioBase;
     private String nombresUsuario;
     private String apellidosUsuario;
-    private List<ReporteSolicitud> reporteSolicitudes;
+    private List<ReporteSolicitud> solicitud;
 }

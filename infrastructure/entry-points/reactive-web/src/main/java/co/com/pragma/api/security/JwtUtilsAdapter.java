@@ -25,9 +25,9 @@ import java.util.Set;
 public class JwtUtilsAdapter {
 
     @Value("${jwt.secret}")
-    private final String jwtSecret;
+    private String jwtSecret;
     @Value("${jwt.expiration.millis}")
-    private final Long jwtExpirationMillis;
+    private Long jwtExpirationMillis;
 
     public SecretKey jwtSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

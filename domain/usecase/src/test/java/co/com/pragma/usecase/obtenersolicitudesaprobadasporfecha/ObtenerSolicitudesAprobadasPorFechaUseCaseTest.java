@@ -100,12 +100,12 @@ public class ObtenerSolicitudesAprobadasPorFechaUseCaseTest {
                     ReporteDiario reporte1 = reportes.get(0);
                     boolean isReporte1Correct = reporte1.getDocumentoId().equals(101L) &&
                             reporte1.getNombresUsuario().equals("Juan") &&
-                            reporte1.getReporteSolicitudes().get(0).getTipoPrestamo().equals("Hipoteca");
+                            reporte1.getSolicitud().get(0).getTipoPrestamo().equals("Hipoteca");
 
                     ReporteDiario reporte2 = reportes.get(1);
                     boolean isReporte2Correct = reporte2.getDocumentoId().equals(102L) &&
                             reporte2.getNombresUsuario().equals("Ana") &&
-                            reporte2.getReporteSolicitudes().get(0).getTipoPrestamo().equals("Vehículo");
+                            reporte2.getSolicitud().get(0).getTipoPrestamo().equals("Vehículo");
 
                     return isReporte1Correct && isReporte2Correct;
                 })

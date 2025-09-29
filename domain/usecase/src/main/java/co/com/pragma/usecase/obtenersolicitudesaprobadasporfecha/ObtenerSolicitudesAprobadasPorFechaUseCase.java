@@ -70,7 +70,7 @@ public class ObtenerSolicitudesAprobadasPorFechaUseCase {
                                         .salarioBase(usuario.getSalarioBase())
                                         .nombresUsuario(usuario.getNombres())
                                         .apellidosUsuario(usuario.getApellidos())
-                                        .reporteSolicitudes(
+                                        .solicitud(
                                                 List.of(ReporteSolicitud.builder()
                                                         .solicitudId(solicitud.getSolicitudId())
                                                         .monto(solicitud.getMonto())

@@ -169,7 +169,7 @@ public class Handler {
         log.info("Consultando solicitudes aprobadas entre las fechas : {} y {}", inicioDelDia, finDelDia);
         return  obtenerSolicitudesAprobadasPorFechaUseCase.ejecutar(inicioDelDia, finDelDia)
                 .flatMap(solicitudes -> solicitudes.isEmpty()
-                        ? ServerResponse.notFound().build()
+                        ? ServerResponse.noContent().build()
                         : ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(solicitudes))
